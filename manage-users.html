@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Database User Manager</title>
+    <style>
+        body { font-family: Arial; padding: 20px; background: #f5f5f5; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .box { background: white; padding: 20px; margin: 10px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; margin: 5px; }
+        button.danger { background: #dc3545; }
+        button.success { background: #28a745; }
+        input { padding: 8px; margin: 5px; border: 1px solid #ddd; border-radius: 4px; width: 250px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background: #f8f9fa; font-weight: 600; }
+        .result { margin-top: 10px; padding: 10px; background: #f8f9fa; border-left: 4px solid #28a745; border-radius: 4px; }
+        .error { border-left-color: #dc3545; background: #fff5f5; }
+        .warning { border-left-color: #ffc107; background: #fffbf0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🗄️ Database User Manager</h1>
+        
+        <div class="box">
+            <h3>1. Check Backend Status</h3>
+            <button onclick="checkBackend()">Check Backend</button>
+            <div id="backendStatus"></div>
+        </div>
+
+        <div class="box">
+            <h3>2. View All Users</h3>
+            <button onclick="viewUsers()">Load Users</button>
+            <div id="usersList"></div>
+        </div>
+
+        <div class="box">
+            <h3>3. Check Specific Email</h3>
+            <input type="email" id="checkEmail" placeholder="Enter email to check">
+            <button onclick="checkEmail()">Check Email</button>
+            <div id="emailResult"></div>
+        </div>
+
+        <div class="box">
+            <h3>4. Register New User</h3>
+            <input type="text" id="newName" placeholder="Name"><br>
+            <input type="email" id="newEmail" placeholder="Email"><br>
+            <input type="text" id="newBlood" placeholder="Blood Group (e.g., O+)"><br>
+            <input type="password" id="newPass" placeholder="Password"><br>
+            <button class="success" onclick="registerUser()">Register User</button>
+            <div id="registerResult"></div>
+        </div>
+
+        <div class="box">
+            <h3>5. SQL Commands</h3>
+            <div class="warning" style="margin-bottom: 10px;">
+                <strong>⚠️ Run these in MySQL to manage users:</strong>
+            </div>
+            <pre style="background: #f8f9fa; padding: 15px; border-radius: 5px; overflow-x: auto;">
+-- View all users
+USE rakshaaid_database;
+SELECT * FROM users;
+
+-- Delete specific user
+DELETE FROM users WHERE email = 'user@example.com';
+
+-- Delete all users (CAUTION!)
+DELETE FROM users;
+
+-- Reset auto increment
+ALTER TABLE users AUTO_INCREMENT = 1;
+            </pre>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3000/api';
+
+        async function checkBackend() {
+            const result = document.getElementById('backendStatus');
+            result.innerHTML = 'Checking...';
+            
+            try {
+                const res = await fetch(API_URL + '/contacts/test@test.com');
+                if (res.ok) {
+                    result.innerHTML = '<div class="result">✅ Backend is running on http://localhost:3000</div>';
+                } else {
+                    result.innerHTML = '<div class="result error">❌ Backend returned error</div>';
+                }
+            } catch (error) {
+                result.innerHTML = '<div class="result error">❌ Backend not running!<br><br>Start it with:<br><code>cd backend && npm start</code></div>';
+            }
+        }
+
+        async function viewUsers() {
+            const result = document.getElementById('usersList');
+            result.innerHTML = 'Loading users...';
+            
+            result.innerHTML = '<div class="warning">⚠️ Cannot directly query users table from frontend.<br><br>Run this in MySQL:<br><code>USE rakshaaid_database;<br>SELECT id, name, email, blood_group FROM users;</code></div>';
+        }
+
+        async function checkEmail() {
+            const email = document.getElementById('checkEmail').value;
+            const result = document.getElementById('emailResult');
+            
+            if (!email) {
+                result.innerHTML = '<div class="error">Please enter an email</div>';
+                return;
+            }
+            
+            result.innerHTML = 'Checking...';
+            
+            // Try to login with dummy password to check if email exists
+            try {
+                const res = await fetch(API_URL + '/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: email, password: 'dummy' })
+                });
+                const data = await res.json();
+                
+                if (data.error === 'Invalid credentials') {
+                    result.innerHTML = '<div class="result">✅ Email EXISTS in database<br>Email: ' + email + '</div>';
+                } else {
+                    result.innerHTML = '<div class="result">❌ Email NOT FOUND in database<br>You can register with this email</div>';
+                }
+            } catch (error) {
+                result.innerHTML = '<div class="error">Error: ' + error.message + '</div>';
+            }
+        }
+
+        async function registerUser() {
+            const name = document.getElementById('newName').value;
+            const email = document.getElementById('newEmail').value;
+            const blood = document.getElementById('newBlood').value;
+            const pass = document.getElementById('newPass').value;
+            const result = document.getElementById('registerResult');
+            
+            if (!name || !email || !blood || !pass) {
+                result.innerHTML = '<div class="error">Please fill all fields</div>';
+                return;
+            }
+            
+            result.innerHTML = 'Registering...';
+            
+            try {
+                const res = await fetch(API_URL + '/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, password: pass, bloodGroup: blood })
+                });
+                const data = await res.json();
+                
+                if (data.success) {
+                    result.innerHTML = '<div class="result">✅ User registered successfully!<br>Name: ' + name + '<br>Email: ' + email + '<br><br>You can now login with these credentials.</div>';
+                    // Clear form
+                    document.getElementById('newName').value = '';
+                    document.getElementById('newEmail').value = '';
+                    document.getElementById('newBlood').value = '';
+                    document.getElementById('newPass').value = '';
+                } else {
+                    result.innerHTML = '<div class="error">❌ ' + data.error + '<br><br>If email already exists, try a different email or delete the existing user from MySQL.</div>';
+                }
+            } catch (error) {
+                result.innerHTML = '<div class="error">❌ Error: ' + error.message + '</div>';
+            }
+        }
+
+        // Auto check on load
+        window.onload = () => {
+            checkBackend();
+        };
+    </script>
+</body>
+</html>

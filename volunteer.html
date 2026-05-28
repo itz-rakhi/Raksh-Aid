@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Volunteer Drivers - RAKSH-AID</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); min-height: 100vh; padding: 20px; }
+
+        .header { background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border-radius: 16px; padding: 18px 25px; display: flex; align-items: center; gap: 15px; margin-bottom: 25px; color: white; }
+        .back-btn { background: rgba(255,255,255,0.2); border: none; color: white; padding: 10px 16px; border-radius: 10px; cursor: pointer; font-size: 0.95rem; font-weight: 600; display: flex; align-items: center; gap: 8px; transition: all 0.3s; }
+        .back-btn:hover { background: rgba(255,255,255,0.3); }
+        .header h1 { font-size: 1.6rem; flex: 1; }
+        .header p { font-size: 0.9rem; opacity: 0.85; }
+
+        .page-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; max-width: 1200px; margin: 0 auto; }
+
+        /* Registration Card */
+        .card { background: white; border-radius: 20px; padding: 30px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
+        .card-title { display: flex; align-items: center; gap: 12px; margin-bottom: 25px; }
+        .card-title i { font-size: 1.8rem; color: #2c3e50; }
+        .card-title h2 { font-size: 1.4rem; color: #2c3e50; }
+
+        /* Gender Toggle */
+        .gender-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 22px; }
+        .gender-btn { padding: 18px; border: 3px solid #e0e0e0; background: white; border-radius: 14px; cursor: pointer; text-align: center; transition: all 0.3s; }
+        .gender-btn.male.selected { border-color: #3b82f6; background: linear-gradient(135deg, #eff6ff, #dbeafe); }
+        .gender-btn.female.selected { border-color: #ec4899; background: linear-gradient(135deg, #fdf2f8, #fce7f3); }
+        .gender-btn i { font-size: 2rem; display: block; margin-bottom: 6px; }
+        .gender-btn.male i { color: #3b82f6; }
+        .gender-btn.female i { color: #ec4899; }
+        .gender-btn span { font-weight: 700; font-size: 1rem; color: #2c3e50; display: block; }
+        .gender-btn small { font-size: 0.75rem; color: #666; }
+
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; margin-bottom: 6px; font-weight: 600; color: #444; font-size: 0.9rem; }
+        .input-wrap { position: relative; }
+        .input-wrap i { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #2c3e50; font-size: 1rem; }
+        .input-wrap input, .input-wrap select { width: 100%; padding: 12px 14px 12px 42px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 0.95rem; transition: all 0.3s; background: #fafafa; }
+        .input-wrap input:focus, .input-wrap select:focus { outline: none; border-color: #2c3e50; background: white; box-shadow: 0 0 0 3px rgba(44,62,80,0.1); }
+
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+        /* Police Verification Box */
+        .verification-box { background: linear-gradient(135deg, #f0fdf4, #dcfce7); border: 2px solid #22c55e; border-radius: 14px; padding: 18px; margin-bottom: 18px; }
+        .verification-box h4 { color: #15803d; font-size: 1rem; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+        .verification-box ul { list-style: none; padding: 0; }
+        .verification-box ul li { font-size: 0.85rem; color: #166534; padding: 4px 0; display: flex; align-items: flex-start; gap: 8px; }
+        .verification-box ul li i { color: #22c55e; margin-top: 2px; flex-shrink: 0; }
+
+        .checkbox-group { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 16px; }
+        .checkbox-group input[type="checkbox"] { width: 18px; height: 18px; margin-top: 2px; accent-color: #2c3e50; flex-shrink: 0; cursor: pointer; }
+        .checkbox-group label { font-size: 0.88rem; color: #444; line-height: 1.5; cursor: pointer; }
+
+        .submit-btn { width: 100%; padding: 15px; border: none; border-radius: 12px; font-size: 1.05rem; font-weight: 700; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .submit-btn.male-btn { background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; box-shadow: 0 8px 20px rgba(59,130,246,0.3); }
+        .submit-btn.female-btn { background: linear-gradient(135deg, #ec4899, #db2777); color: white; box-shadow: 0 8px 20px rgba(236,72,153,0.3); }
+        .submit-btn:hover { transform: translateY(-2px); }
+        .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+        /* Volunteer List */
+        .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+        .stat-chip { background: #f8f9fa; border-radius: 12px; padding: 14px; text-align: center; border: 2px solid #e9ecef; }
+        .stat-chip .num { font-size: 1.8rem; font-weight: 800; color: #2c3e50; }
+        .stat-chip .lbl { font-size: 0.78rem; color: #666; font-weight: 600; }
+        .stat-chip.male-stat .num { color: #3b82f6; }
+        .stat-chip.female-stat .num { color: #ec4899; }
+
+        .filter-tabs { display: flex; gap: 8px; margin-bottom: 18px; }
+        .ftab { flex: 1; padding: 10px; border: 2px solid #e0e0e0; background: white; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 0.88rem; transition: all 0.3s; text-align: center; }
+        .ftab.active-all { border-color: #2c3e50; background: #2c3e50; color: white; }
+        .ftab.active-male { border-color: #3b82f6; background: #3b82f6; color: white; }
+        .ftab.active-female { border-color: #ec4899; background: #ec4899; color: white; }
+
+        /* Search bar */
+        .search-wrap { position: relative; margin-bottom: 14px; }
+        .search-wrap i { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #999; }
+        .search-wrap input { width: 100%; padding: 11px 14px 11px 40px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 0.92rem; transition: border 0.3s; }
+        .search-wrap input:focus { outline: none; border-color: #2c3e50; }
+
+        .volunteer-list { display: flex; flex-direction: column; gap: 10px; max-height: 580px; overflow-y: auto; padding-right: 4px; }
+        .volunteer-list::-webkit-scrollbar { width: 5px; }
+        .volunteer-list::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
+
+        /* Driver Card */
+        .vol-card { border-radius: 12px; border: 1.5px solid #e9ecef; overflow: hidden; transition: all 0.3s; box-shadow: 0 1px 6px rgba(0,0,0,0.07); background: white; }
+        .vol-card:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.12); }
+        .vol-card.male { border-left: 4px solid #3b82f6; }
+        .vol-card.female { border-left: 4px solid #ec4899; }
+
+        .vol-card-top { display: flex; align-items: flex-start; gap: 10px; padding: 12px 12px 10px; }
+        .vol-avatar { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; margin-top: 2px; }
+        .vol-card.male .vol-avatar { background: #dbeafe; color: #2563eb; }
+        .vol-card.female .vol-avatar { background: #fce7f3; color: #db2777; }
+
+        .vol-main { flex: 1; min-width: 0; }
+        .vol-name { font-weight: 700; color: #1a1a2e; font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .vol-phone { font-size: 0.82rem; color: #2c3e50; font-weight: 600; margin-top: 2px; }
+        .vol-phone i { color: #28a745; margin-right: 3px; font-size: 0.75rem; }
+        .vol-location { font-size: 0.78rem; color: #555; margin-top: 3px; display: flex; align-items: center; gap: 4px; }
+        .vol-location i { color: #dc3545; font-size: 0.72rem; }
+
+        .vol-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 5px; }
+        .tag { padding: 2px 8px; border-radius: 20px; font-size: 0.68rem; font-weight: 700; display: inline-flex; align-items: center; gap: 3px; }
+        .tag-vehicle { background: #e0f2fe; color: #0369a1; }
+        .tag-time { background: #fef9c3; color: #854d0e; }
+        .tag-verified { background: #dcfce7; color: #15803d; }
+        .tag-pending { background: #fef3c7; color: #92400e; }
+        .tag-male { background: #dbeafe; color: #1d4ed8; }
+        .tag-female { background: #fce7f3; color: #be185d; }
+
+        /* Action buttons row */
+        .vol-actions { display: grid; grid-template-columns: 1fr 1fr 1fr; border-top: 1px solid #f0f0f0; }
+        .vol-actions button { padding: 9px 4px; border: none; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; transition: all 0.25s; }
+        .btn-call { background: linear-gradient(135deg, #28a745, #20c997); color: white; }
+        .btn-call:hover { filter: brightness(1.1); }
+        .btn-schedule { background: linear-gradient(135deg, #667eea, #764ba2); color: white; }
+        .btn-schedule:hover { filter: brightness(1.1); }
+        .btn-drop { background: linear-gradient(135deg, #2c3e50, #34495e); color: white; }
+        .btn-drop:hover { filter: brightness(1.1); }
+
+        .empty-state { text-align: center; padding: 50px 20px; color: #999; }
+        .empty-state i { font-size: 3rem; display: block; margin-bottom: 12px; }
+
+        /* Schedule Modal */
+        .sched-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 9000; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+        .sched-modal.open { display: flex; }
+        .sched-modal-box { background: white; border-radius: 20px; padding: 28px; width: 90%; max-width: 440px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); animation: popIn 0.3s ease; }
+        .sched-modal-box h3 { font-size: 1.1rem; color: #2c3e50; margin-bottom: 5px; }
+        .sched-modal-box p { font-size: 0.82rem; color: #888; margin-bottom: 14px; }
+        .sched-driver-info { background: #f8f9fa; border-radius: 10px; padding: 12px 14px; margin-bottom: 16px; border-left: 4px solid #667eea; }
+        .sched-driver-info .dname { font-weight: 700; color: #2c3e50; font-size: 0.95rem; }
+        .sched-driver-info .ddetail { font-size: 0.78rem; color: #666; margin-top: 3px; }
+        .sched-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .sched-label { font-size: 0.8rem; font-weight: 700; color: #444; margin-bottom: 4px; }
+        .sched-input { width: 100%; padding: 10px 12px; border: 2px solid #e0e0e0; border-radius: 9px; font-size: 0.88rem; margin-bottom: 10px; transition: border 0.3s; font-family: inherit; }
+        .sched-input:focus { outline: none; border-color: #667eea; }
+        .sched-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px; }
+        .sched-btns button { padding: 12px; border: none; border-radius: 10px; font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: all 0.3s; }
+        .btn-confirm-sched { background: linear-gradient(135deg, #667eea, #764ba2); color: white; }
+        .btn-confirm-sched:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102,126,234,0.4); }
+        .btn-cancel-sched { background: #f0f0f0; color: #555; }
+
+        /* Drop Modal */
+        .drop-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 9000; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+        .drop-modal.open { display: flex; }
+        .drop-modal-box { background: white; border-radius: 20px; padding: 30px; width: 90%; max-width: 420px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); animation: popIn 0.3s ease; }
+        @keyframes popIn { from { transform: scale(0.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .drop-modal-box h3 { font-size: 1.2rem; color: #2c3e50; margin-bottom: 6px; }
+        .drop-modal-box p { font-size: 0.88rem; color: #666; margin-bottom: 18px; }
+        .drop-driver-info { background: #f8f9fa; border-radius: 12px; padding: 14px; margin-bottom: 18px; display: flex; align-items: center; gap: 12px; }
+        .drop-driver-info .dname { font-weight: 700; color: #2c3e50; font-size: 1rem; }
+        .drop-driver-info .ddetail { font-size: 0.82rem; color: #666; margin-top: 3px; }
+        .drop-input { width: 100%; padding: 12px 14px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 0.95rem; margin-bottom: 12px; transition: border 0.3s; }
+        .drop-input:focus { outline: none; border-color: #2c3e50; }
+        .drop-modal-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 6px; }
+        .drop-modal-btns button { padding: 13px; border: none; border-radius: 10px; font-weight: 700; font-size: 0.95rem; cursor: pointer; transition: all 0.3s; }
+        .btn-confirm-drop { background: linear-gradient(135deg, #2c3e50, #34495e); color: white; }
+        .btn-confirm-drop:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(44,62,80,0.4); }
+        .btn-cancel-drop { background: #f0f0f0; color: #555; }
+        .btn-cancel-drop:hover { background: #e0e0e0; }
+
+        /* Success Toast */
+        .toast { position: fixed; bottom: 30px; right: 30px; background: #2c3e50; color: white; padding: 16px 24px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); display: none; align-items: center; gap: 12px; z-index: 9999; font-weight: 600; animation: slideUp 0.4s ease; }
+        .toast.show { display: flex; }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        @media (max-width: 768px) {
+            .page-grid { grid-template-columns: 1fr; }
+            .form-row { grid-template-columns: 1fr; }
+            .stats-row { grid-template-columns: repeat(3, 1fr); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <button class="back-btn" onclick="window.location.href='index.html'"><i class="fas fa-arrow-left"></i> Back</button>
+        <div>
+            <h1><i class="fas fa-hands-helping"></i> Volunteer Driver Program</h1>
+            <p>Safe, verified drivers helping those in need — police background checked</p>
+        </div>
+    </div>
+
+    <div class="page-grid">
+
+        <!-- Registration Form -->
+        <div class="card">
+            <div class="card-title">
+                <i class="fas fa-user-plus"></i>
+                <h2>Register as Volunteer Driver</h2>
+            </div>
+
+            <!-- Gender Selection -->
+            <div class="gender-toggle">
+                <div class="gender-btn male selected" id="maleBtn" onclick="selectGender('male')">
+                    <i class="fas fa-male"></i>
+                    <span>Male Volunteer</span>
+                    <small>Available for all routes</small>
+                </div>
+                <div class="gender-btn female" id="femaleBtn" onclick="selectGender('female')">
+                    <i class="fas fa-female"></i>
+                    <span>Female Volunteer</span>
+                    <small>Preferred for women passengers</small>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label><i class="fas fa-user" style="margin-right:5px;color:#2c3e50;"></i>Full Name</label>
+                    <div class="input-wrap">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="volName" placeholder="Your full name">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-phone" style="margin-right:5px;color:#2c3e50;"></i>Phone Number</label>
+                    <div class="input-wrap">
+                        <i class="fas fa-phone"></i>
+                        <input type="tel" id="volPhone" placeholder="10-digit number" maxlength="10">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label><i class="fas fa-id-card" style="margin-right:5px;color:#2c3e50;"></i>Driving License No.</label>
+                    <div class="input-wrap">
+                        <i class="fas fa-id-card"></i>
+                        <input type="text" id="volLicense" placeholder="e.g. MH01 20230012345">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-car" style="margin-right:5px;color:#2c3e50;"></i>Vehicle Type</label>
+                    <div class="input-wrap">
+                        <i class="fas fa-car"></i>
+                        <select id="volVehicle">
+                            <option value="">Select vehicle</option>
+                            <option value="Car">Car</option>
+                            <option value="SUV">SUV</option>
+                            <option value="Auto Rickshaw">Auto Rickshaw</option>
+                            <option value="Bike">Bike</option>
+                            <option value="Van">Van</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label><i class="fas fa-map-marker-alt" style="margin-right:5px;color:#2c3e50;"></i>City / Area</label>
+                    <div class="input-wrap">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <input type="text" id="volCity" placeholder="e.g. Mumbai, Andheri">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-clock" style="margin-right:5px;color:#2c3e50;"></i>Availability</label>
+                    <div class="input-wrap">
+                        <i class="fas fa-clock"></i>
+                        <select id="volAvailability">
+                            <option value="24/7">24/7 Available</option>
+                            <option value="Day (6AM-6PM)">Day (6AM–6PM)</option>
+                            <option value="Night (6PM-6AM)">Night (6PM–6AM)</option>
+                            <option value="Weekends Only">Weekends Only</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Police Verification Info -->
+            <div class="verification-box">
+                <h4><i class="fas fa-shield-alt"></i> Police Background Verification Required</h4>
+                <ul>
+                    <li><i class="fas fa-check-circle"></i> No criminal record in any Indian state</li>
+                    <li><i class="fas fa-check-circle"></i> Valid government-issued ID (Aadhaar / PAN)</li>
+                    <li><i class="fas fa-check-circle"></i> Valid driving license (minimum 2 years old)</li>
+                    <li><i class="fas fa-check-circle"></i> Character certificate from local police station</li>
+                    <li><i class="fas fa-check-circle"></i> Verification takes 3–7 working days after submission</li>
+                </ul>
+            </div>
+
+            <div class="checkbox-group">
+                <input type="checkbox" id="checkVerification">
+                <label for="checkVerification">I confirm that I have <strong>no criminal background</strong> and I consent to a police verification check. I understand that false information will lead to permanent disqualification.</label>
+            </div>
+
+            <div class="checkbox-group">
+                <input type="checkbox" id="checkTerms">
+                <label for="checkTerms">I agree to the RAKSH-AID Volunteer Code of Conduct and will prioritize passenger safety at all times.</label>
+            </div>
+
+            <button class="submit-btn male-btn" id="submitBtn" onclick="registerVolunteer()">
+                <i class="fas fa-user-check"></i> Submit Registration
+            </button>
+        </div>
+
+        <!-- Volunteer Listing -->
+        <div class="card">
+            <div class="card-title">
+                <i class="fas fa-search-location"></i>
+                <h2>Find a Driver Near You</h2>
+            </div>
+
+            <!-- Location Search -->
+            <div style="margin-bottom:16px;">
+                <div class="search-wrap">
+                    <i class="fas fa-map-marker-alt" style="color:#dc3545;"></i>
+                    <input type="text" id="locationSearch" placeholder="Enter city or area (e.g. Neral, Karjat, Mumbai)..." onkeydown="if(event.key==='Enter') searchByLocation()">
+                    <button onclick="searchByLocation()" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:linear-gradient(135deg,#2c3e50,#34495e);color:white;border:none;padding:7px 16px;border-radius:8px;font-size:0.85rem;font-weight:700;cursor:pointer;"><i class="fas fa-search"></i> Search</button>
+                </div>
+                <div style="display:flex;gap:8px;margin-top:8px;">
+                    <button onclick="filterGender('all')" id="gf-all" style="flex:1;padding:8px;border:2px solid #2c3e50;background:#2c3e50;color:white;border-radius:8px;font-size:0.82rem;font-weight:700;cursor:pointer;"><i class="fas fa-users"></i> All</button>
+                    <button onclick="filterGender('male')" id="gf-male" style="flex:1;padding:8px;border:2px solid #e0e0e0;background:white;color:#2c3e50;border-radius:8px;font-size:0.82rem;font-weight:700;cursor:pointer;"><i class="fas fa-male" style="color:#3b82f6;"></i> Male</button>
+                    <button onclick="filterGender('female')" id="gf-female" style="flex:1;padding:8px;border:2px solid #e0e0e0;background:white;color:#2c3e50;border-radius:8px;font-size:0.82rem;font-weight:700;cursor:pointer;"><i class="fas fa-female" style="color:#ec4899;"></i> Female</button>
+                </div>
+            </div>
+
+            <div id="searchResultInfo" style="font-size:0.82rem;color:#888;margin-bottom:10px;min-height:18px;"></div>
+
+            <div class="volunteer-list" id="volunteerList">
+                <div class="empty-state">
+                    <i class="fas fa-map-marker-alt" style="font-size:2.5rem;color:#dc3545;display:block;margin-bottom:10px;"></i>
+                    <span style="font-size:0.92rem;color:#888;">Enter your location above to find nearby drivers</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Schedule Travel Modal -->
+    <div class="sched-modal" id="schedModal">
+        <div class="sched-modal-box">
+            <h3><i class="fas fa-calendar-alt" style="color:#667eea;margin-right:8px;"></i>Schedule My Travel</h3>
+            <p>Book a ride with this volunteer driver in advance</p>
+            <div class="sched-driver-info" id="schedDriverInfo"></div>
+            <div class="sched-row">
+                <div>
+                    <div class="sched-label"><i class="fas fa-calendar"></i> Travel Date</div>
+                    <input class="sched-input" type="date" id="schedDate">
+                </div>
+                <div>
+                    <div class="sched-label"><i class="fas fa-clock"></i> Travel Time</div>
+                    <input class="sched-input" type="time" id="schedTime">
+                </div>
+            </div>
+            <div class="sched-label"><i class="fas fa-map-marker-alt" style="color:#dc3545;"></i> Pickup Location</div>
+            <input class="sched-input" type="text" id="schedFrom" placeholder="Enter your pickup address">
+            <div class="sched-label"><i class="fas fa-flag" style="color:#28a745;"></i> Drop Destination</div>
+            <input class="sched-input" type="text" id="schedTo" placeholder="Enter your destination">
+            <div class="sched-label"><i class="fas fa-phone" style="color:#2c3e50;"></i> Your Phone Number</div>
+            <input class="sched-input" type="tel" id="schedPhone" placeholder="10-digit number" maxlength="10">
+            <div class="sched-btns">
+                <button class="btn-cancel-sched" onclick="closeSchedModal()"><i class="fas fa-times"></i> Cancel</button>
+                <button class="btn-confirm-sched" onclick="confirmSchedule()"><i class="fas fa-paper-plane"></i> Confirm Booking</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Drop Request Modal -->
+    <div class="drop-modal" id="dropModal">
+        <div class="drop-modal-box">
+            <h3><i class="fas fa-car" style="color:#2c3e50;margin-right:8px;"></i>Request Drop</h3>
+            <p>Send a drop request to this volunteer driver</p>
+            <div class="drop-driver-info" id="dropDriverInfo"></div>
+            <input class="drop-input" type="text" id="dropFrom" placeholder="📍 Your current location / pickup point">
+            <input class="drop-input" type="text" id="dropTo" placeholder="🏁 Drop destination">
+            <input class="drop-input" type="tel" id="dropPhone" placeholder="📞 Your phone number" maxlength="10">
+            <div class="drop-modal-btns">
+                <button class="btn-cancel-drop" onclick="closeDropModal()"><i class="fas fa-times"></i> Cancel</button>
+                <button class="btn-confirm-drop" onclick="confirmDrop()"><i class="fas fa-paper-plane"></i> Send Request</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast">
+        <i class="fas fa-check-circle" style="color:#28a745;font-size:1.3rem;"></i>
+        <span id="toastMsg">Registration submitted!</span>
+    </div>
+
+    <script src="api-service.js"></script>
+    <script>
+        let selectedGender = 'male';
+        let currentFilter = 'all';
+        let allVolunteers = [];
+
+        function selectGender(gender) {
+            selectedGender = gender;
+            document.getElementById('maleBtn').classList.toggle('selected', gender === 'male');
+            document.getElementById('femaleBtn').classList.toggle('selected', gender === 'female');
+            const btn = document.getElementById('submitBtn');
+            btn.className = `submit-btn ${gender}-btn`;
+            btn.innerHTML = `<i class="fas fa-user-check"></i> Submit as ${gender === 'male' ? 'Male' : 'Female'} Volunteer`;
+        }
+
+        async function registerVolunteer() {
+            const name = document.getElementById('volName').value.trim();
+            const phone = document.getElementById('volPhone').value.trim();
+            const license = document.getElementById('volLicense').value.trim();
+            const vehicle = document.getElementById('volVehicle').value;
+            const city = document.getElementById('volCity').value.trim();
+            const availability = document.getElementById('volAvailability').value;
+            const checkV = document.getElementById('checkVerification').checked;
+            const checkT = document.getElementById('checkTerms').checked;
+
+            if (!name || !phone || !license || !vehicle || !city) {
+                showToast('⚠️ Please fill all required fields.', '#dc3545'); return;
+            }
+            if (phone.length !== 10 || isNaN(phone)) {
+                showToast('⚠️ Enter a valid 10-digit phone number.', '#dc3545'); return;
+            }
+            if (!checkV || !checkT) {
+                showToast('⚠️ Please accept both declarations.', '#dc3545'); return;
+            }
+
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+
+            const result = await apiService.registerVolunteer({ name, phone, license, vehicle, city, availability, gender: selectedGender });
+
+            btn.disabled = false;
+            selectGender(selectedGender);
+
+            if (!result.success) {
+                showToast('⚠️ ' + (result.error || 'Registration failed.'), '#dc3545'); return;
+            }
+
+            ['volName','volPhone','volLicense','volCity'].forEach(id => document.getElementById(id).value = '');
+            document.getElementById('volVehicle').value = '';
+            document.getElementById('checkVerification').checked = false;
+            document.getElementById('checkTerms').checked = false;
+
+            showToast('✅ Registration submitted! Pending police verification.', '#28a745');
+            await loadAndRender();
+        }
+
+        function filterVolunteers(type) {
+            currentFilter = type;
+            ['all','male','female'].forEach(t => {
+                document.getElementById(`tab-${t}`).className = 'ftab' + (t === type ? ` active-${t}` : '');
+            });
+            renderList();
+        }
+
+        async function loadAndRender() {
+            allVolunteers = await apiService.getVolunteers();
+            renderList();
+        }
+
+        function renderList() {
+            const query = (document.getElementById('searchInput')?.value || '').toLowerCase();
+            let filtered = currentFilter === 'all' ? allVolunteers : allVolunteers.filter(v => v.gender === currentFilter);
+            if (query) filtered = filtered.filter(v =>
+                v.name.toLowerCase().includes(query) ||
+                v.city.toLowerCase().includes(query) ||
+                v.vehicle_type.toLowerCase().includes(query)
+            );
+
+            document.getElementById('totalCount').textContent = allVolunteers.length;
+            document.getElementById('maleCount').textContent = allVolunteers.filter(v => v.gender === 'male').length;
+            document.getElementById('femaleCount').textContent = allVolunteers.filter(v => v.gender === 'female').length;
+
+            const list = document.getElementById('volunteerList');
+            if (!filtered.length) {
+                list.innerHTML = `<div class="empty-state"><i class="fas fa-search"></i>No drivers found.</div>`;
+                return;
+            }
+
+            const vehicleIcon = { 'Car':'fa-car', 'SUV':'fa-truck', 'Auto Rickshaw':'fa-taxi', 'Bike':'fa-motorcycle', 'Van':'fa-shuttle-van' };
+
+            list.innerHTML = filtered.map(v => {
+                const isVerified = v.status === 'Verified';
+                const vIcon = vehicleIcon[v.vehicle_type] || 'fa-car';
+                return `
+                <div class="vol-card ${v.gender}">
+                    <div class="vol-card-top">
+                        <div class="vol-avatar"><i class="fas fa-${v.gender === 'male' ? 'male' : 'female'}"></i></div>
+                        <div class="vol-main">
+                            <div class="vol-name">${v.name}</div>
+                            <div class="vol-phone"><i class="fas fa-phone-alt"></i>${v.phone}</div>
+                            <div class="vol-tags">
+                                <span class="tag tag-vehicle"><i class="fas ${vIcon}"></i> ${v.vehicle_type}</span>
+                                <span class="tag tag-city"><i class="fas fa-map-marker-alt"></i> ${v.city}</span>
+                                <span class="tag tag-time"><i class="fas fa-clock"></i> ${v.availability}</span>
+                                <span class="tag ${isVerified ? 'tag-verified' : 'tag-pending'}">${isVerified ? '✓ Police Verified' : '⏳ Pending'}</span>
+                                <span class="tag tag-${v.gender}">${v.gender === 'male' ? '♂ Male' : '♀ Female'}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="vol-actions">
+                        <button class="btn-call" onclick="callDriver('${v.phone}', '${v.name}')">
+                            <i class="fas fa-phone-alt"></i> Call Driver
+                        </button>
+                        <button class="btn-drop" onclick="openDropModal(${v.id}, '${v.name}', '${v.phone}', '${v.vehicle_type}', '${v.city}')">
+                            <i class="fas fa-car"></i> Request Drop
+                        </button>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function callDriver(phone, name) {
+            if (confirm(`📞 Call ${name} at ${phone}?`)) window.location.href = `tel:${phone}`;
+        }
+
+        let activeDriver = null;
+        function openDropModal(id, name, phone, vehicle, city) {
+            activeDriver = { id, name, phone, vehicle, city };
+            document.getElementById('dropDriverInfo').innerHTML = `
+                <div class="vol-avatar" style="width:44px;height:44px;font-size:1.2rem;background:#e0f2fe;color:#0369a1;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div>
+                    <div class="dname">${name}</div>
+                    <div class="ddetail"><i class="fas fa-phone-alt" style="color:#28a745;"></i> ${phone} &nbsp;|&nbsp; <i class="fas fa-car" style="color:#2c3e50;"></i> ${vehicle} &nbsp;|&nbsp; <i class="fas fa-map-marker-alt" style="color:#dc3545;"></i> ${city}</div>
+                </div>`;
+            document.getElementById('dropFrom').value = '';
+            document.getElementById('dropTo').value = '';
+            document.getElementById('dropPhone').value = '';
+            document.getElementById('dropModal').classList.add('open');
+        }
+
+        function closeDropModal() { document.getElementById('dropModal').classList.remove('open'); }
+
+        function confirmDrop() {
+            const from = document.getElementById('dropFrom').value.trim();
+            const to = document.getElementById('dropTo').value.trim();
+            const phone = document.getElementById('dropPhone').value.trim();
+            if (!from || !to || !phone) { showToast('⚠️ Please fill all drop request fields.', '#dc3545'); return; }
+            if (phone.length !== 10 || isNaN(phone)) { showToast('⚠️ Enter a valid 10-digit phone number.', '#dc3545'); return; }
+
+            const msg = `🚗 RAKSH-AID Drop Request\n\nHello ${activeDriver.name},\nSomeone needs a drop.\n\n📍 Pickup: ${from}\n🏁 Drop: ${to}\n📞 Contact: ${phone}\n\nPlease confirm if you can help.`;
+            closeDropModal();
+            showToast(`✅ Drop request sent to ${activeDriver.name}!`, '#28a745');
+            setTimeout(() => { window.location.href = `sms:${activeDriver.phone}?body=${encodeURIComponent(msg)}`; }, 800);
+        }
+
+        function showToast(msg, color = '#2c3e50') {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMsg').textContent = msg;
+            toast.style.background = color;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3500);
+        }
+
+        let currentGenderFilter = 'all';
+
+        function filterGender(gender) {
+            currentGenderFilter = gender;
+            ['all','male','female'].forEach(g => {
+                const btn = document.getElementById(`gf-${g}`);
+                if (g === gender) {
+                    btn.style.background = g === 'all' ? '#2c3e50' : g === 'male' ? '#3b82f6' : '#ec4899';
+                    btn.style.borderColor = g === 'all' ? '#2c3e50' : g === 'male' ? '#3b82f6' : '#ec4899';
+                    btn.style.color = 'white';
+                } else {
+                    btn.style.background = 'white';
+                    btn.style.borderColor = '#e0e0e0';
+                    btn.style.color = '#2c3e50';
+                }
+            });
+            renderSearchResults();
+        }
+
+        async function searchByLocation() {
+            const query = document.getElementById('locationSearch').value.trim();
+            if (!query) { showToast('⚠️ Please enter a city or area to search.', '#dc3545'); return; }
+
+            document.getElementById('searchResultInfo').textContent = 'Searching...';
+            const list = document.getElementById('volunteerList');
+            list.innerHTML = `<div class="empty-state"><i class="fas fa-spinner fa-spin" style="font-size:2rem;color:#667eea;display:block;margin-bottom:10px;"></i>Finding drivers near ${query}...</div>`;
+
+            allVolunteers = await apiService.getVolunteers();
+            renderSearchResults();
+        }
+
+        function renderSearchResults() {
+            const searchQuery = document.getElementById('locationSearch').value.trim().toLowerCase();
+            let filtered = searchQuery
+                ? allVolunteers.filter(v =>
+                    v.city.toLowerCase().includes(searchQuery) ||
+                    v.name.toLowerCase().includes(searchQuery))
+                : allVolunteers;
+
+            if (currentGenderFilter !== 'all') {
+                filtered = filtered.filter(v => v.gender === currentGenderFilter);
+            }
+
+            const info = document.getElementById('searchResultInfo');
+            info.textContent = searchQuery
+                ? `Found ${filtered.length} driver${filtered.length !== 1 ? 's' : ''} near "${document.getElementById('locationSearch').value.trim()}"`
+                : '';
+
+            const list = document.getElementById('volunteerList');
+            if (!filtered.length) {
+                list.innerHTML = `<div class="empty-state"><i class="fas fa-search" style="font-size:2.5rem;color:#dc3545;display:block;margin-bottom:10px;"></i><span style="font-size:0.92rem;color:#888;">No drivers found near "${document.getElementById('locationSearch').value.trim()}".<br>Try a different city or area.</span></div>`;
+                return;
+            }
+
+            const vehicleIcon = { 'Car':'fa-car', 'SUV':'fa-truck', 'Auto Rickshaw':'fa-taxi', 'Bike':'fa-motorcycle', 'Van':'fa-shuttle-van' };
+
+            list.innerHTML = filtered.map(v => {
+                const isVerified = v.status === 'Verified';
+                const vIcon = vehicleIcon[v.vehicle_type] || 'fa-car';
+                return `
+                <div class="vol-card ${v.gender}">
+                    <div class="vol-card-top">
+                        <div class="vol-avatar"><i class="fas fa-${v.gender === 'male' ? 'male' : 'female'}"></i></div>
+                        <div class="vol-main">
+                            <div class="vol-name">${v.name}</div>
+                            <div class="vol-phone"><i class="fas fa-phone-alt"></i> ${v.phone}</div>
+                            <div class="vol-location"><i class="fas fa-map-marker-alt"></i> ${v.city}</div>
+                            <div class="vol-tags">
+                                <span class="tag tag-vehicle"><i class="fas ${vIcon}"></i> ${v.vehicle_type}</span>
+                                <span class="tag tag-time"><i class="fas fa-clock"></i> ${v.availability}</span>
+                                <span class="tag ${isVerified ? 'tag-verified' : 'tag-pending'}">${isVerified ? '✓ Police Verified' : '⏳ Pending'}</span>
+                                <span class="tag tag-${v.gender}">${v.gender === 'male' ? '♂ Male' : '♀ Female'}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="vol-actions">
+                        <button class="btn-call" onclick="callDriver('${v.phone}', '${v.name}')">
+                            <i class="fas fa-phone-alt"></i> Call Driver
+                        </button>
+                        <button class="btn-drop" onclick="openDropModal(${v.id}, '${v.name}', '${v.phone}', '${v.vehicle_type}', '${v.city}')">
+                            <i class="fas fa-car"></i> Request Drop
+                        </button>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        // Init
+        loadAndRender();
+    </script>
+</body>
+</html>

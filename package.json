@@ -1,0 +1,55 @@
+{
+  "name": "rakshaaid",
+  "version": "1.0.0",
+  "description": "Emergency Safety Web Application with SOS alerts, location tracking, and AI assistance",
+  "main": "index.html",
+  "scripts": {
+    "start": "python -m http.server 8000",
+    "dev": "live-server --port=8000",
+    "test": "echo \"Run test-data-generator.js in browser console\"",
+    "deploy:netlify": "netlify deploy --prod",
+    "deploy:vercel": "vercel --prod",
+    "deploy:firebase": "firebase deploy --only hosting",
+    "build": "echo \"No build step required for static site\"",
+    "lint": "eslint src/js/**/*.js",
+    "format": "prettier --write \"**/*.{js,css,html,md}\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/rakshaaid.git"
+  },
+  "keywords": [
+    "emergency",
+    "safety",
+    "sos",
+    "women-safety",
+    "location-tracking",
+    "ai-assistant",
+    "web-app",
+    "pwa"
+  ],
+  "author": {
+    "name": "Rakhi Samant",
+    "email": "rakhisamant4105@gmail.com"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/yourusername/rakshaaid/issues"
+  },
+  "homepage": "https://github.com/yourusername/rakshaaid#readme",
+  "devDependencies": {
+    "eslint": "^8.0.0",
+    "prettier": "^3.0.0",
+    "live-server": "^1.2.2"
+  },
+  "dependencies": {},
+  "engines": {
+    "node": ">=14.0.0",
+    "npm": ">=6.0.0"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ]
+}

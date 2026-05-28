@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyber Help - RAKSH-AID</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            background: #1a1a2e;
+            background-image: 
+                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" opacity="0.05"><text x="10" y="50" font-size="40" fill="%23fff">🔒</text></svg>'),
+                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" opacity="0.05"><text x="10" y="50" font-size="40" fill="%23fff">🛡️</text></svg>'),
+                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" opacity="0.05"><text x="10" y="50" font-size="40" fill="%23fff">💻</text></svg>'),
+                linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            background-size: 150px 150px, 200px 200px, 180px 180px, 100%;
+            background-position: 0 0, 50% 50%, 100% 100%, 0 0;
+            background-repeat: repeat;
+            min-height: 100vh; 
+            padding: 20px; 
+        }
+        .header { background: rgba(0,0,0,0.3); color: white; padding: 20px; border-radius: 15px; margin-bottom: 30px; backdrop-filter: blur(10px); }
+        .header h1 { display: flex; align-items: center; gap: 15px; font-size: 2rem; }
+        .back-btn { background: rgba(255,255,255,0.2); border: none; color: white; padding: 10px 20px; border-radius: 8px; cursor: pointer; margin-top: 15px; }
+        .back-btn:hover { background: rgba(255,255,255,0.3); }
+        .container { max-width: 900px; margin: 0 auto; }
+        .complaint-form { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); margin-bottom: 30px; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #333; }
+        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 1rem; font-family: inherit; }
+        .form-group textarea { min-height: 120px; resize: vertical; }
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus { outline: none; border-color: #667eea; }
+        .file-input-wrapper { position: relative; overflow: hidden; display: inline-block; width: 100%; }
+        .file-input-wrapper input[type=file] { position: absolute; left: -9999px; }
+        .file-input-label { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 12px; background: #f8f9fa; border: 2px dashed #667eea; border-radius: 10px; cursor: pointer; transition: all 0.3s; }
+        .file-input-label:hover { background: #e9ecef; }
+        .file-preview { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 10px; }
+        .file-preview img { width: 100px; height: 100px; object-fit: cover; border-radius: 8px; border: 2px solid #e0e0e0; }
+        .submit-btn { width: 100%; padding: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 12px; font-size: 1.1rem; font-weight: 700; cursor: pointer; transition: all 0.3s; }
+        .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(102,126,234,0.4); }
+        .complaints-list { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
+        .complaint-item { padding: 20px; border: 2px solid #e0e0e0; border-radius: 12px; margin-bottom: 15px; }
+        .complaint-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .complaint-type { background: #667eea; color: white; padding: 5px 15px; border-radius: 20px; font-size: 0.85rem; }
+        .complaint-date { color: #666; font-size: 0.9rem; }
+        .complaint-desc { margin: 10px 0; color: #333; }
+        .complaint-link { color: #667eea; text-decoration: none; word-break: break-all; }
+        .complaint-link:hover { text-decoration: underline; }
+        .complaint-images { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
+        .complaint-images img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; cursor: pointer; }
+        .status-badge { padding: 5px 12px; border-radius: 15px; font-size: 0.85rem; font-weight: 600; }
+        .status-pending { background: #ffc107; color: #000; }
+        .status-resolved { background: #28a745; color: white; }
+        .delete-btn { background: #dc3545; color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; }
+        .delete-btn:hover { background: #c82333; }
+        .info-box { background: #e7f3ff; border-left: 4px solid #2196F3; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+        .info-box i { color: #2196F3; margin-right: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-shield-alt"></i> Cyber Help Center</h1>
+            <p>Report cyber crimes, online harassment, fraud, and digital threats</p>
+            <button class="back-btn" onclick="window.location.href='index.html'">
+                <i class="fas fa-arrow-left"></i> Back to Home
+            </button>
+        </div>
+
+        <div class="info-box">
+            <i class="fas fa-info-circle"></i>
+            <strong>National Cyber Crime Helpline:</strong> 1930 | 
+            <strong>Website:</strong> <a href="https://cybercrime.gov.in" target="_blank" style="color: #2196F3;">cybercrime.gov.in</a>
+        </div>
+
+        <div class="complaint-form">
+            <h2 style="margin-bottom: 20px; color: #667eea;"><i class="fas fa-file-alt"></i> Register Cyber Complaint</h2>
+            
+            <form id="cyberComplaintForm">
+                <div class="form-group">
+                    <label><i class="fas fa-tag"></i> Complaint Type</label>
+                    <select id="complaintType" required>
+                        <option value="">Select Type</option>
+                        <option value="Online Harassment">Online Harassment</option>
+                        <option value="Cyberbullying">Cyberbullying</option>
+                        <option value="Financial Fraud">Financial Fraud</option>
+                        <option value="Identity Theft">Identity Theft</option>
+                        <option value="Hacking">Hacking</option>
+                        <option value="Phishing">Phishing</option>
+                        <option value="Fake Profile">Fake Profile</option>
+                        <option value="Blackmail">Blackmail</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-align-left"></i> Complaint Description</label>
+                    <textarea id="complaintDesc" placeholder="Describe the incident in detail..." required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-link"></i> Related Link (Optional)</label>
+                    <input type="url" id="complaintLink" placeholder="https://example.com/evidence">
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-images"></i> Upload Evidence (Photos/Screenshots)</label>
+                    <div class="file-input-wrapper">
+                        <input type="file" id="complaintPhotos" accept="image/*" multiple>
+                        <label for="complaintPhotos" class="file-input-label">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <span>Click to upload images</span>
+                        </label>
+                    </div>
+                    <div id="filePreview" class="file-preview"></div>
+                </div>
+
+                <button type="submit" class="submit-btn">
+                    <i class="fas fa-paper-plane"></i> Submit Complaint
+                </button>
+            </form>
+        </div>
+
+        <div class="complaints-list">
+            <h2 style="margin-bottom: 20px; color: #667eea;"><i class="fas fa-list"></i> My Complaints</h2>
+            <div id="complaintsList"></div>
+        </div>
+    </div>
+
+    <script>
+        let complaints = [];
+        let currentUser = null;
+
+        function loadUserData() {
+            currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            if (currentUser && currentUser.email) {
+                const userComplaintsKey = `cyberComplaints_${currentUser.email}`;
+                complaints = JSON.parse(localStorage.getItem(userComplaintsKey)) || [];
+            }
+        }
+
+        loadUserData();
+
+        document.getElementById('complaintPhotos').addEventListener('change', function(e) {
+            const preview = document.getElementById('filePreview');
+            preview.innerHTML = '';
+            
+            Array.from(e.target.files).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const img = document.createElement('img');
+                    img.src = event.target.result;
+                    preview.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+            });
+        });
+
+        document.getElementById('cyberComplaintForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (!currentUser || !currentUser.email) {
+                alert('⚠️ Please login to submit complaint');
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            const type = document.getElementById('complaintType').value;
+            const desc = document.getElementById('complaintDesc').value;
+            const link = document.getElementById('complaintLink').value;
+            const photos = document.getElementById('complaintPhotos').files;
+            
+            const complaint = {
+                id: Date.now(),
+                type: type,
+                description: desc,
+                link: link,
+                images: [],
+                date: new Date().toLocaleString(),
+                status: 'Pending'
+            };
+
+            // Convert images to base64
+            const promises = Array.from(photos).map(file => {
+                return new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => resolve(e.target.result);
+                    reader.readAsDataURL(file);
+                });
+            });
+
+            Promise.all(promises).then(async images => {
+                complaint.images = images;
+                complaints.push(complaint);
+                saveComplaints();
+                
+                // Save to MySQL database
+                try {
+                    const response = await fetch('http://localhost:3000/api/cyber-complaint', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            userEmail: currentUser.email,
+                            complaintType: type,
+                            description: desc,
+                            evidenceUrl: link
+                        })
+                    });
+                    const result = await response.json();
+                    console.log('Complaint saved to database:', result);
+                } catch (error) {
+                    console.error('Error saving to database:', error);
+                }
+                
+                loadComplaints();
+                
+                // Reset form
+                document.getElementById('cyberComplaintForm').reset();
+                document.getElementById('filePreview').innerHTML = '';
+                
+                alert('✅ Complaint registered successfully!\n\nFor immediate action, also report to:\n📞 National Cyber Crime Helpline: 1930\n🌐 Website: cybercrime.gov.in');
+            });
+        });
+
+        function saveComplaints() {
+            if (currentUser && currentUser.email) {
+                const userComplaintsKey = `cyberComplaints_${currentUser.email}`;
+                localStorage.setItem(userComplaintsKey, JSON.stringify(complaints));
+            }
+        }
+
+        function loadComplaints() {
+            const list = document.getElementById('complaintsList');
+            
+            if (complaints.length === 0) {
+                list.innerHTML = '<p style="text-align: center; color: #999;">No complaints registered yet</p>';
+                return;
+            }
+
+            list.innerHTML = complaints.map(complaint => `
+                <div class="complaint-item">
+                    <div class="complaint-header">
+                        <span class="complaint-type">${complaint.type}</span>
+                        <span class="status-badge ${complaint.status === 'Pending' ? 'status-pending' : 'status-resolved'}">
+                            ${complaint.status}
+                        </span>
+                    </div>
+                    <div class="complaint-date"><i class="fas fa-clock"></i> ${complaint.date}</div>
+                    <div class="complaint-desc">${complaint.description}</div>
+                    ${complaint.link ? `<div><i class="fas fa-link"></i> <a href="${complaint.link}" target="_blank" class="complaint-link">${complaint.link}</a></div>` : ''}
+                    ${complaint.images.length > 0 ? `
+                        <div class="complaint-images">
+                            ${complaint.images.map(img => `<img src="${img}" onclick="window.open('${img}')">`).join('')}
+                        </div>
+                    ` : ''}
+                    <div style="margin-top: 15px;">
+                        <button class="delete-btn" onclick="deleteComplaint(${complaint.id})">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function deleteComplaint(id) {
+            if (confirm('Are you sure you want to delete this complaint?')) {
+                complaints = complaints.filter(c => c.id !== id);
+                saveComplaints();
+                loadComplaints();
+            }
+        }
+
+        loadComplaints();
+    </script>
+</body>
+</html>

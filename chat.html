@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emergency Chat - RAKSH-AID</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: rgba(0, 0, 0, 0.4);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .chat-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .contacts-sidebar {
+            width: 320px;
+            background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
+            border-right: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            border-bottom: 1px solid #e0e0e0;
+            color: white;
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.3rem;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .online-status {
+            width: 10px;
+            height: 10px;
+            background: #28a745;
+            border-radius: 50%;
+            animation: pulse-dot 2s infinite;
+        }
+
+        .contacts-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .contact-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+        }
+
+        .contact-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 3px;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            transform: scaleY(0);
+            transition: transform 0.3s;
+        }
+
+        .contact-item:hover {
+            background: linear-gradient(90deg, #f8f9fa 0%, #ffffff 100%);
+            transform: translateX(5px);
+        }
+
+        .contact-item:hover::before {
+            transform: scaleY(1);
+        }
+
+        .contact-item.active {
+            background: linear-gradient(90deg, #e9ecef 0%, #f8f9fa 100%);
+            border-left: 4px solid #2c3e50;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .contact-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 10px rgba(102, 126, 234, 0.3);
+            position: relative;
+        }
+
+        .contact-avatar::after {
+            content: '';
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            width: 12px;
+            height: 12px;
+            background: #28a745;
+            border: 2px solid white;
+            border-radius: 50%;
+        }
+
+        .contact-details {
+            flex: 1;
+        }
+
+        .contact-name {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 3px;
+        }
+
+        .contact-phone {
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: linear-gradient(180deg, #f5f5f5 0%, #e9ecef 100%);
+        }
+
+        .chat-header {
+            padding: 20px;
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .chat-header .contact-avatar {
+            width: 45px;
+            height: 45px;
+        }
+
+        .chat-header h3 {
+            color: #2c3e50;
+            flex: 1;
+        }
+
+        .call-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+
+        .call-btn:hover {
+            background: #218838;
+        }
+
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 16px;
+            word-wrap: break-word;
+            animation: messageSlide 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        @keyframes messageSlide {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.sent {
+            align-self: flex-end;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 16px 16px 4px 16px;
+        }
+
+        .message.received {
+            align-self: flex-start;
+            background: white;
+            color: #333;
+            border-radius: 16px 16px 16px 4px;
+            border: 1px solid #e9ecef;
+        }
+
+        .message-time {
+            font-size: 0.75rem;
+            opacity: 0.7;
+            margin-top: 5px;
+        }
+
+        .chat-input-area {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 14px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s;
+            background: #f8f9fa;
+        }
+
+        .chat-input:focus {
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .send-btn {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .send-btn:hover {
+            transform: scale(1.1) rotate(15deg);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+        }
+
+        .send-btn:active {
+            transform: scale(0.95);
+        }
+
+        .empty-state {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            gap: 15px;
+        }
+
+        .empty-state i {
+            font-size: 5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .typing-indicator {
+            display: flex;
+            gap: 5px;
+            padding: 12px 16px;
+            background: white;
+            border-radius: 16px;
+            width: fit-content;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: #999;
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-10px); }
+        }
+
+        @media (max-width: 768px) {
+            .contacts-sidebar {
+                width: 100%;
+                display: none;
+            }
+
+            .contacts-sidebar.mobile-show {
+                display: flex;
+            }
+
+            .chat-area.mobile-hide {
+                display: none;
+            }
+
+            .message {
+                max-width: 85%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <button class="back-btn" onclick="window.location.href='index.html'">
+                <i class="fas fa-arrow-left"></i> Back
+            </button>
+            <h1><i class="fas fa-comments"></i> RAKSH-AID Chat</h1>
+        </div>
+    </div>
+
+    <div class="chat-container">
+        <div class="contacts-sidebar" id="contactsSidebar">
+            <div class="sidebar-header">
+                <h2><i class="fas fa-users"></i> Contacts</h2>
+                <div style="display: flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 0.85rem;">
+                    <div class="online-status"></div>
+                    <span>Online</span>
+                </div>
+            </div>
+            <div class="contacts-list" id="chatContactsList"></div>
+        </div>
+
+        <div class="chat-area" id="chatArea">
+            <div class="empty-state" id="emptyState">
+                <i class="fas fa-sms"></i>
+                <h3>Send SMS to Emergency Contacts</h3>
+                <p>Click on any contact to open your SMS app</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let contacts = [];
+        let activeContact = null;
+        let messages = {};
+        let currentUser = null;
+
+        // Load user-specific data
+        function loadUserData() {
+            currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            if (currentUser && currentUser.email) {
+                const userContactsKey = `contacts_${currentUser.email}`;
+                const userMessagesKey = `chatMessages_${currentUser.email}`;
+                contacts = JSON.parse(localStorage.getItem(userContactsKey)) || [];
+                messages = JSON.parse(localStorage.getItem(userMessagesKey)) || {};
+            }
+        }
+
+        loadUserData();
+
+        function loadChatContacts() {
+            const contactsList = document.getElementById('chatContactsList');
+            
+            // Add AI Assistant first
+            let contactsHTML = `
+                <div class="contact-item" onclick="startVideoCall()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none;">
+                    <div class="contact-avatar" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">🤖</div>
+                    <div class="contact-details">
+                        <div class="contact-name" style="color: white;">AI Safety Assistant</div>
+                        <div class="contact-phone" style="color: rgba(255,255,255,0.9);">📞 Video Call Available</div>
+                    </div>
+                </div>
+            `;
+            
+            if (contacts.length === 0) {
+                contactsHTML += '<div style="padding: 20px; text-align: center; color: #999;">No contacts available<br><small>Add contacts from home page</small></div>';
+            } else {
+                contactsHTML += contacts.map(contact => `
+                    <div class="contact-item" onclick="openChat(${contact.id})">
+                        <div class="contact-avatar">${contact.name.charAt(0).toUpperCase()}</div>
+                        <div class="contact-details">
+                            <div class="contact-name">${contact.name}</div>
+                            <div class="contact-phone">${contact.phone}</div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            contactsList.innerHTML = contactsHTML;
+        }
+
+        function openChat(contactId) {
+            activeContact = contacts.find(c => c.id === contactId);
+            if (!activeContact) return;
+
+            // Directly open SMS app
+            window.location.href = `sms:${activeContact.phone}`;
+        }
+
+
+
+        function callContact(phone) {
+            window.location.href = `tel:${phone}`;
+        }
+
+        loadChatContacts();
+        
+        // Video Call Functions
+        let callTimer = 0;
+        let callInterval = null;
+        
+        function startVideoCall() {
+            const modal = document.getElementById('videoCallModal');
+            modal.style.display = 'flex';
+            callTimer = 0;
+            updateCallTimer();
+            callInterval = setInterval(updateCallTimer, 1000);
+            playVoiceMessage('welcome');
+        }
+        
+        function updateCallTimer() {
+            callTimer++;
+            const minutes = Math.floor(callTimer / 60);
+            const seconds = callTimer % 60;
+            document.getElementById('callTimer').textContent = 
+                `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+        
+        function playVoiceMessage(type) {
+            const lang = localStorage.getItem('aiLanguage') || 'en';
+            
+            const messages = {
+                en: {
+                    welcome: "Namaste! I am your safety companion. Please tell me, how may I assist you today?",
+                    help: "I understand you need help. Please stay calm, everything will be alright. I am immediately alerting your emergency contacts and tracking your location. Help is on the way. You are not alone.",
+                    scared: "Please don't worry, I am here with you. You are safe now. Take a deep breath with me. Your emergency contacts have been notified and they are coming to help you. Everything will be fine.",
+                    location: "I have shared your live location with all your emergency contacts. They can see exactly where you are right now. Please stay where you are if it is safe. Help is coming soon."
+                },
+                hi: {
+                    welcome: "नमस्ते! मैं आपका सुरक्षा साथी हूं। कृपया बताइए, मैं आज आपकी कैसे मदद कर सकता हूं?",
+                    help: "मैं समझता हूं कि आपको मदद चाहिए। कृपया शांत रहें, सब ठीक हो जाएगा। मैं तुरंत आपके आपातकालीन संपर्कों को सूचित कर रहा हूं और आपके स्थान को ट्रैक कर रहा हूं। मदद आ रही है। आप अकेले नहीं हैं।",
+                    scared: "कृपया चिंता न करें, मैं आपके साथ हूं। आप अब सुरक्षित हैं। मेरे साथ गहरी सांस लें। आपके आपातकालीन संपर्कों को सूचित कर दिया गया है और वे आपकी मदद के लिए आ रहे हैं। सब कुछ ठीक हो जाएगा।",
+                    location: "मैंने आपका लाइव लोकेशन आपके सभी आपातकालीन संपर्कों के साथ साझा कर दिया है। वे देख सकते हैं कि आप अभी कहां हैं। यदि सुरक्षित है तो कृपया वहीं रहें। मदद जल्द आ रही है।"
+                },
+                mr: {
+                    welcome: "नमस्कार! मी तुमचा सुरक्षा साथी आहे. कृपया सांगा, मी आज तुम्हाला कशी मदत करू शकतो?",
+                    help: "मला समजले की तुम्हाला मदतीची गरज आहे. कृपया शांत राहा, सर्व काही ठीक होईल. मी तुमच्या आपत्कालीन संपर्कांना ताबडतोब सूचित करत आहे आणि तुमचे स्थान ट्रॅक करत आहे. मदत येत आहे. तुम्ही एकटे नाही आहात.",
+                    scared: "कृपया काळजी करू नका, मी तुमच्यासोबत आहे. तुम्ही आता सुरक्षित आहात. माझ्यासोबत दीर्घ श्वास घ्या. तुमच्या आपत्कालीन संपर्कांना सूचित केले आहे आणि ते तुम्हाला मदत करण्यासाठी येत आहेत. सर्व काही ठीक होईल.",
+                    location: "मी तुमचे लाइव्ह लोकेशन तुमच्या सर्व आपत्कालीन संपर्कांसह शेअर केले आहे. ते पाहू शकतात की तुम्ही आत्ता कुठे आहात. सुरक्षित असल्यास कृपया तिथेच राहा. मदत लवकरच येत आहे."
+                }
+            };
+            
+            const voiceDiv = document.getElementById('voiceMessages');
+            const newMsg = document.createElement('p');
+            newMsg.style.cssText = 'color: white; margin: 10px 0; animation: messageSlide 0.3s ease;';
+            newMsg.innerHTML = `<i class="fas fa-volume-up"></i> "${messages[lang][type]}"`;  
+            voiceDiv.appendChild(newMsg);
+            voiceDiv.scrollTop = voiceDiv.scrollHeight;
+            
+            const speech = new SpeechSynthesisUtterance(messages[lang][type]);
+            
+            const voices = window.speechSynthesis.getVoices();
+            let selectedVoice;
+            
+            if (lang === 'hi') {
+                selectedVoice = voices.find(voice => voice.lang.includes('hi-IN') || voice.lang.includes('hi'));
+                speech.lang = 'hi-IN';
+            } else if (lang === 'mr') {
+                selectedVoice = voices.find(voice => voice.lang.includes('mr-IN') || voice.lang.includes('mr'));
+                speech.lang = 'mr-IN';
+            } else {
+                selectedVoice = voices.find(voice => voice.lang.includes('en-IN') || voice.name.includes('India'));
+                speech.lang = 'en-IN';
+            }
+            
+            if (selectedVoice) {
+                speech.voice = selectedVoice;
+            }
+            
+            speech.rate = 0.85;
+            speech.pitch = 1.0;
+            speech.volume = 1;
+            
+            window.speechSynthesis.speak(speech);
+        }
+        
+        function endVideoCall() {
+            const modal = document.getElementById('videoCallModal');
+            modal.style.display = 'none';
+            clearInterval(callInterval);
+            window.speechSynthesis.cancel();
+        }
+    </script>
+    
+    <div id="videoCallModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9999; justify-content: center; align-items: center;">
+        <div style="width: 90%; max-width: 800px; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border-radius: 20px; padding: 30px; text-align: center;">
+            <div style="position: absolute; top: 20px; right: 20px;">
+                <select id="aiLanguageSelect" onchange="changeAILanguage()" style="padding: 8px 15px; border-radius: 8px; background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); cursor: pointer;">
+                    <option value="en">English</option>
+                    <option value="hi">हिंदी</option>
+                    <option value="mr">मराठी</option>
+                </select>
+            </div>
+            <div style="position: relative; margin-bottom: 20px;">
+                <div style="width: 150px; height: 150px; margin: 0 auto; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 5rem; animation: pulse 2s infinite;">🤖</div>
+                <div style="position: absolute; top: 10px; right: 10px; background: #28a745; color: white; padding: 5px 15px; border-radius: 20px; font-size: 0.85rem;">
+                    <i class="fas fa-circle" style="font-size: 0.6rem; animation: blink 1s infinite;"></i> Connected
+                </div>
+            </div>
+            <h2 style="color: white; margin-bottom: 10px;">AI Safety Assistant</h2>
+            <p style="color: rgba(255,255,255,0.8); margin-bottom: 20px;">I'm here to help you feel safe. You're not alone.</p>
+            <div id="callTimer" style="color: #28a745; font-size: 1.2rem; font-weight: 600; margin-bottom: 20px;">00:00</div>
+            <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 12px; margin-bottom: 20px; max-height: 200px; overflow-y: auto;" id="voiceMessages"></div>
+            <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+                <button onclick="playVoiceMessage('help')" style="padding: 12px 24px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 25px; cursor: pointer; font-weight: 600;">
+                    <i class="fas fa-hand-paper"></i> I Need Help
+                </button>
+                <button onclick="playVoiceMessage('scared')" style="padding: 12px 24px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; border: none; border-radius: 25px; cursor: pointer; font-weight: 600;">
+                    <i class="fas fa-heart"></i> I'm Scared
+                </button>
+                <button onclick="playVoiceMessage('location')" style="padding: 12px 24px; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; border: none; border-radius: 25px; cursor: pointer; font-weight: 600;">
+                    <i class="fas fa-map-marker-alt"></i> Share Location
+                </button>
+                <button onclick="endVideoCall()" style="padding: 12px 24px; background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); color: white; border: none; border-radius: 25px; cursor: pointer; font-weight: 600;">
+                    <i class="fas fa-phone-slash"></i> End Call
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <style>
+        @keyframes blink {
+            0%, 50%, 100% { opacity: 1; }
+            25%, 75% { opacity: 0.3; }
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+    </style>
+</body>
+</html>

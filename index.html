@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAKSH-AID - Emergency Safety App</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</head>
+<body>
+    <div class="lang-selector">
+        <select id="languageSelect" onchange="changeLanguage()">
+            <option value="en">English</option>
+            <option value="hi">हिंदी</option>
+            <option value="mr">मराठी</option>
+        </select>
+    </div>
+    <div class="user-profile">
+        <i class="fas fa-user-circle"></i>
+        <span id="userName">Loading...</span>
+        <button onclick="logout()" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+    </div>
+    <div class="container">
+        <header>
+            <div class="hero-section">
+                <div class="hero-content">
+                    <div class="logo-container">
+                        <i class="fas fa-shield-alt logo-icon"></i>
+                        <h1>RAKSH-AID</h1>
+                    </div>
+                    <p class="tagline">Your 24/7 Safety Companion</p>
+                    <div class="status-indicator">
+                        <span class="status-dot"></span>
+                        <span class="status-text">Protected</span>
+                    </div>
+                </div>
+                <div class="hero-image">
+                    <div class="safety-illustration">
+                        <i class="fas fa-shield-alt security-symbol"></i>
+                        <div class="hand-heart-logo">
+                            <i class="fas fa-hand-holding-heart"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <section class="sos-section">
+            <div class="sos-container">
+                <div class="sos-ripple"></div>
+                <button id="sosBtn" class="sos-button">
+                    <i class="fas fa-exclamation-triangle sos-icon"></i>
+                    <span class="sos-text" data-lang="sos">SOS</span>
+                    <span class="sos-subtext" data-lang="emergency-alert">Emergency Alert</span>
+                </button>
+                <button id="voiceBtn" class="voice-button" title="Say 'Help me Raksha' to trigger SOS">
+                    <i class="fas fa-microphone"></i>
+                </button>
+            </div>
+            <div class="alert-stats">
+                <div class="stat-box">
+                    <i class="fas fa-bell"></i>
+                    <div class="stat-info">
+                        <span class="stat-number" id="totalAlerts">0</span>
+                        <span class="stat-label">Total Alerts</span>
+                    </div>
+                </div>
+                <div class="stat-box">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <div class="stat-info">
+                        <span class="stat-number active" id="activeAlerts">0</span>
+                        <span class="stat-label">Active Alerts</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="contacts-section">
+            <div class="section-header">
+                <i class="fas fa-address-book"></i>
+                <h2>Emergency Contacts</h2>
+                <button class="camera-btn" onclick="openCameraTracking()" title="Front Camera Tracking">
+                    <i class="fas fa-camera"></i>
+                </button>
+                <button class="gallery-btn" onclick="openGallery()" title="View Photo Gallery">
+                    <i class="fas fa-images"></i> Gallery
+                </button>
+                <button class="chat-link-btn" onclick="window.location.href='chat.html'">
+                    <i class="fas fa-comments"></i> Chat
+                </button>
+                <button class="mental-health-btn" onclick="openMentalHealthSupport()" title="Mental Health Emergency">
+                    <i class="fas fa-brain"></i> Mental Health
+                </button>
+                <span class="contact-count" id="contactCount">0 contacts</span>
+            </div>
+            
+            <div class="add-contact-form">
+                <div class="input-group">
+                    <i class="fas fa-user"></i>
+                    <input type="text" id="contactName" placeholder="Contact Name" />
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-phone"></i>
+                    <input type="tel" id="contactPhone" placeholder="Phone Number" />
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-envelope"></i>
+                    <input type="email" id="contactEmail" placeholder="Email (Optional)" />
+                </div>
+                <button id="addContactBtn">
+                    <i class="fas fa-plus"></i> Add Contact
+                </button>
+            </div>
+
+            <div id="contactsList" class="contacts-list"></div>
+        </section>
+
+        <section class="emergency-numbers">
+            <div class="section-header">
+                <i class="fas fa-phone-volume"></i>
+                <h2>Emergency Services</h2>
+                <span class="emergency-badge">24/7 Available</span>
+            </div>
+            <div class="emergency-grid">
+                <div class="emergency-card police" onclick="callNumber('100')">
+                    <div class="card-glow"></div>
+                    <i class="fas fa-shield-alt"></i>
+                    <span class="service">Police</span>
+                    <span class="number">100</span>
+                    <span class="call-text"><i class="fas fa-phone-alt"></i> Tap to Call</span>
+                </div>
+                <div class="emergency-card ambulance" onclick="callNumber('102')">
+                    <div class="card-glow"></div>
+                    <i class="fas fa-ambulance"></i>
+                    <span class="service">Ambulance</span>
+                    <span class="number">102</span>
+                    <span class="call-text"><i class="fas fa-phone-alt"></i> Tap to Call</span>
+                </div>
+                <div class="emergency-card fire" onclick="callNumber('101')">
+                    <div class="card-glow"></div>
+                    <i class="fas fa-fire-extinguisher"></i>
+                    <span class="service">Fire</span>
+                    <span class="number">101</span>
+                    <span class="call-text"><i class="fas fa-phone-alt"></i> Tap to Call</span>
+                </div>
+                <div class="emergency-card women" onclick="callNumber('1091')">
+                    <div class="card-glow"></div>
+                    <i class="fas fa-female"></i>
+                    <span class="service">Women Helpline</span>
+                    <span class="number">1091</span>
+                    <span class="call-text"><i class="fas fa-phone-alt"></i> Tap to Call</span>
+                </div>
+                <div class="emergency-card blood" onclick="window.location.href='bloodbank.html'">
+                    <div class="card-glow"></div>
+                    <i class="fas fa-tint"></i>
+                    <span class="service">Blood Bank</span>
+                    <span class="number"><i class="fas fa-heartbeat"></i></span>
+                    <span class="call-text"><i class="fas fa-arrow-right"></i> View Details</span>
+                </div>
+                <div class="emergency-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);" onclick="window.location.href='cyber-help.html'">
+                    <div class="card-glow"></div>
+                    <i class="fas fa-laptop-code"></i>
+                    <span class="service">Cyber Help</span>
+                    <span class="number">1930</span>
+                    <span class="call-text"><i class="fas fa-arrow-right"></i> Report Crime</span>
+                </div>
+                <div class="emergency-card" style="background: linear-gradient(135deg, #059669 0%, #047857 100%);" onclick="window.location.href='volunteer.html'">
+                    <div class="card-glow"></div>
+                    <i class="fas fa-hands-helping"></i>
+                    <span class="service">Volunteers</span>
+                    <span class="number" style="font-size:1rem;">Drivers</span>
+                    <span class="call-text"><i class="fas fa-arrow-right"></i> Join / Find</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="map-section">
+            <div class="section-header">
+                <i class="fas fa-map-marked-alt"></i>
+                <h2>Live Location Tracking</h2>
+            </div>
+            <div class="map-container">
+                <div id="map"></div>
+                <div class="map-overlay">
+                    <div class="location-info" id="locationInfo">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>Getting location...</span>
+                    </div>
+                </div>
+            </div>
+            <div class="map-actions">
+                <button id="shareLocationBtn" class="share-location-btn">
+                    <i class="fas fa-share-alt"></i> Share Location
+                </button>
+                <button id="viewFullMapBtn" class="view-full-map-btn">
+                    <i class="fas fa-expand"></i> View Full Map
+                </button>
+            </div>
+            <div class="map-stats">
+                <div class="stat-item">
+                    <i class="fas fa-clock"></i>
+                    <span id="currentTime"></span>
+                </div>
+                <div class="stat-item">
+                    <i class="fas fa-signal"></i>
+                    <span>GPS Active</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="women-safety-banner">
+            <div class="banner-content">
+                <div class="banner-icon">
+                    <i class="fas fa-hands-helping"></i>
+                </div>
+                <div class="banner-text">
+                    <h3>Women Safety First</h3>
+                    <p>Empowering women with instant emergency response and 24/7 support</p>
+                    <div class="safety-features">
+                        <span class="feature-badge"><i class="fas fa-check-circle"></i> Instant SOS</span>
+                        <span class="feature-badge"><i class="fas fa-check-circle"></i> Live Tracking</span>
+                        <span class="feature-badge"><i class="fas fa-check-circle"></i> 24/7 Support</span>
+                    </div>
+                </div>
+                <div class="banner-illustration">
+                    <div class="woman-icon-group">
+                        <i class="fas fa-female woman-icon"></i>
+                        <i class="fas fa-heart heart-icon"></i>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="quick-tips">
+            <div class="section-header">
+                <i class="fas fa-lightbulb"></i>
+                <h2>Safety Tips</h2>
+            </div>
+            <div class="tips-carousel">
+                <div class="tip-card">
+                    <div class="tip-icon-wrapper">
+                        <i class="fas fa-user-friends"></i>
+                    </div>
+                    <p>Always inform someone about your whereabouts</p>
+                </div>
+                <div class="tip-card">
+                    <div class="tip-icon-wrapper">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <p>Keep your phone charged and accessible</p>
+                </div>
+                <div class="tip-card">
+                    <div class="tip-icon-wrapper">
+                        <i class="fas fa-map-marked-alt"></i>
+                    </div>
+                    <p>Share your live location with trusted contacts</p>
+                </div>
+                <div class="tip-card" style="background: rgba(255,107,53,0.15); border: 2px solid #ff6b35;">
+                    <div class="tip-icon-wrapper" style="background: rgba(255,107,53,0.2); border-color: #ff6b35;">
+                        <i class="fas fa-headset" style="color: #f39c12;"></i>
+                    </div>
+                    <p style="font-weight: 600; color: white;">Report Issues & Support</p>
+                    <a href="tel:9321760465" style="font-size: 1.3rem; font-weight: 700; color: #f39c12; text-decoration: none; display: block; margin: 8px 0;">9321760465</a>
+                    <p style="font-size: 0.75rem; margin: 0;">Available 24/7 for your safety</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div id="sosModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h2>SOS Alert Sent!</h2>
+            <p>Emergency contacts have been notified with your location.</p>
+            <div class="modal-details">
+                <i class="fas fa-clock"></i>
+                <span id="alertTime"></span>
+            </div>
+            <div class="alert-progress">
+                <div class="progress-bar"></div>
+            </div>
+            <button id="closeModal">
+                <i class="fas fa-times"></i> Close
+            </button>
+        </div>
+    </div>
+
+    <div id="cameraModal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <h2><i class="fas fa-camera"></i> Front Camera Tracking</h2>
+            <p style="margin-bottom: 20px;">Camera is active for safety tracking</p>
+            <video id="cameraVideo" autoplay playsinline style="width: 100%; border-radius: 12px; margin-bottom: 15px;"></video>
+            <canvas id="cameraCanvas" style="display: none;"></canvas>
+            <div style="display: flex; gap: 10px;">
+                <button id="capturePhotoBtn" style="flex: 1; padding: 12px; background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: 600;">
+                    <i class="fas fa-camera"></i> Capture Photo
+                </button>
+                <button id="closeCameraBtn" style="flex: 1; padding: 12px; background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: 600;">
+                    <i class="fas fa-times"></i> Close Camera
+                </button>
+            </div>
+            <div id="capturedPhotos" style="margin-top: 20px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;"></div>
+        </div>
+    </div>
+
+    <div id="mentalHealthModal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <h2 style="color: #9b59b6;"><i class="fas fa-brain"></i> Mental Health Emergency</h2>
+            <p style="margin-bottom: 20px; color: #666;">You're not alone. Help is available 24/7</p>
+            
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                <button onclick="callNumber('08046110007')" style="padding: 15px; background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%); color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 10px; justify-content: center;">
+                    <i class="fas fa-phone-alt"></i> Call Vandrevala Foundation (24/7)
+                </button>
+                
+                <button onclick="callNumber('9152987821')" style="padding: 15px; background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 10px; justify-content: center;">
+                    <i class="fas fa-phone-alt"></i> Call iCall (Mon-Sat 8AM-10PM)
+                </button>
+                
+                <button onclick="window.location.href='chat.html'" style="padding: 15px; background: linear-gradient(135deg, #1abc9c 0%, #16a085 100%); color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 10px; justify-content: center;">
+                    <i class="fas fa-comments"></i> Chat with AI Support
+                </button>
+                
+                <button onclick="shareMentalHealthLocation()" style="padding: 15px; background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 10px; justify-content: center;">
+                    <i class="fas fa-map-marker-alt"></i> Share Location with Contacts
+                </button>
+                
+                <button onclick="findNearbyCounselors()" style="padding: 15px; background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%); color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 10px; justify-content: center;">
+                    <i class="fas fa-hospital"></i> Find Nearby Counseling Centers
+                </button>
+            </div>
+            
+            <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 10px; border-left: 4px solid #9b59b6;">
+                <p style="font-size: 0.9rem; color: #555; margin: 0;"><strong>Remember:</strong> It's okay to ask for help. Your mental health matters.</p>
+            </div>
+            
+            <button onclick="closeMentalHealthModal()" style="margin-top: 15px; width: 100%; padding: 12px; background: #e0e0e0; color: #333; border: none; border-radius: 10px; cursor: pointer; font-weight: 600;">
+                <i class="fas fa-times"></i> Close
+            </button>
+        </div>
+    </div>
+
+    <div id="galleryModal" class="modal">
+        <div class="modal-content" style="max-width: 800px; max-height: 90vh; overflow-y: auto;">
+            <h2 style="color: #e67e22;"><i class="fas fa-images"></i> Photo Gallery</h2>
+            <p style="margin-bottom: 20px; color: #666;">Captured safety photos with timestamps</p>
+            
+            <div id="galleryGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;"></div>
+            
+            <button onclick="closeGallery()" style="width: 100%; padding: 12px; background: #e0e0e0; color: #333; border: none; border-radius: 10px; cursor: pointer; font-weight: 600;">
+                <i class="fas fa-times"></i> Close
+            </button>
+        </div>
+    </div>
+
+    <button id="scrollTopBtn" class="scroll-top-btn">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- EmailJS for automated email alerts -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="email-config.js"></script>
+    <script src="api-service.js"></script>
+    <script src="auth.js"></script>
+    <script src="app.js"></script>
+    <script>
+        // Display user full name
+        function displayUserName() {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            const userNameElement = document.getElementById('userName');
+            
+            if (currentUser) {
+                if (currentUser.name) {
+                    userNameElement.textContent = currentUser.name;
+                } else if (currentUser.email) {
+                    // Fallback to email name if full name not available
+                    userNameElement.textContent = currentUser.email.split('@')[0];
+                } else {
+                    userNameElement.textContent = 'User';
+                }
+            } else {
+                userNameElement.textContent = 'Guest';
+            }
+        }
+        
+        // Call immediately and after DOM loads
+        displayUserName();
+        document.addEventListener('DOMContentLoaded', displayUserName);
+        
+        // Mental Health Support Functions
+        function openMentalHealthSupport() {
+            document.getElementById('mentalHealthModal').classList.add('active');
+            document.getElementById('mentalHealthModal').style.display = 'flex';
+        }
+        
+        function closeMentalHealthModal() {
+            document.getElementById('mentalHealthModal').classList.remove('active');
+            document.getElementById('mentalHealthModal').style.display = 'none';
+        }
+        
+        function shareMentalHealthLocation() {
+            if (confirm('Share your location with emergency contacts?')) {
+                getUserLocation().then(location => {
+                    const locationUrl = `https://www.openstreetmap.org/?mlat=${location.lat}&mlon=${location.lng}#map=15/${location.lat}/${location.lng}`;
+                    const message = `I need support. My location: ${locationUrl}`;
+                    
+                    contacts.forEach((contact, index) => {
+                        setTimeout(() => {
+                            window.location.href = `sms:${contact.phone}?body=${encodeURIComponent(message)}`;
+                        }, index * 1000);
+                    });
+                    
+                    alert('✅ Location shared with emergency contacts');
+                }).catch(() => {
+                    alert('⚠️ Unable to get location');
+                });
+            }
+        }
+        
+        function findNearbyCounselors() {
+            getUserLocation().then(location => {
+                const url = `https://www.google.com/maps/search/counseling+centers+near+me/@${location.lat},${location.lng},14z`;
+                window.open(url, '_blank');
+            }).catch(() => {
+                window.open('https://www.google.com/maps/search/counseling+centers', '_blank');
+            });
+        }
+        
+        // Gallery Functions
+        function openGallery() {
+            document.getElementById('galleryModal').classList.add('active');
+            document.getElementById('galleryModal').style.display = 'flex';
+            loadGallery();
+        }
+        
+        function closeGallery() {
+            document.getElementById('galleryModal').classList.remove('active');
+            document.getElementById('galleryModal').style.display = 'none';
+        }
+        
+        function loadGallery() {
+            const galleryGrid = document.getElementById('galleryGrid');
+            
+            if (currentUser && currentUser.email) {
+                const userPhotosKey = `cameraPhotos_${currentUser.email}`;
+                const photos = JSON.parse(localStorage.getItem(userPhotosKey)) || [];
+                
+                if (photos.length === 0) {
+                    galleryGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #999; padding: 40px;">No photos captured yet</p>';
+                    return;
+                }
+                
+                galleryGrid.innerHTML = photos.map((photo, index) => `
+                    <div style="position: relative; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.2); transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                        <img src="${photo.data}" style="width: 100%; height: 200px; object-fit: cover; display: block;">
+                        <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); padding: 10px; color: white;">
+                            <div style="font-size: 0.75rem; font-weight: 600;"><i class="fas fa-clock"></i> ${photo.time}</div>
+                        </div>
+                        <button onclick="deletePhoto(${index})" style="position: absolute; top: 8px; right: 8px; background: rgba(220,53,69,0.9); color: white; border: none; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-trash" style="font-size: 0.8rem;"></i>
+                        </button>
+                    </div>
+                `).join('');
+            } else {
+                galleryGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #999;">Please login to view gallery</p>';
+            }
+        }
+        
+        function deletePhoto(index) {
+            if (confirm('Delete this photo?')) {
+                if (currentUser && currentUser.email) {
+                    const userPhotosKey = `cameraPhotos_${currentUser.email}`;
+                    let photos = JSON.parse(localStorage.getItem(userPhotosKey)) || [];
+                    photos.splice(index, 1);
+                    localStorage.setItem(userPhotosKey, JSON.stringify(photos));
+                    loadGallery();
+                }
+            }
+        }
+    </script>
+</body>
+</html>

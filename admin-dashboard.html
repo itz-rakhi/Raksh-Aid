@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - RAKSH-AID</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #1a1a2e; color: #eee; }
+        
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+        .header h1 { font-size: 1.8rem; display: flex; align-items: center; gap: 15px; }
+        .logout-btn { background: rgba(255,255,255,0.2); border: none; color: white; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; }
+        .logout-btn:hover { background: rgba(255,255,255,0.3); }
+        
+        .stats-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 20px; padding: 30px 40px; }
+        .stat-card { background: #ffffff; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); display: flex; align-items: center; gap: 20px; }
+        .stat-icon { width: 60px; height: 60px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; }
+        .stat-icon.red { background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%); color: white; }
+        .stat-icon.blue { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; }
+        .stat-icon.purple { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .stat-icon.green { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; }
+        .stat-icon.orange { background: linear-gradient(135deg, #f7971e 0%, #ffd200 100%); color: white; }
+        .stat-info h3 { font-size: 2rem; color: #1a1a2e; margin-bottom: 5px; }
+        .stat-info p { color: #555; font-size: 0.9rem; font-weight: 600; }
+        
+        .tabs { background: #ffffff; margin: 0 40px; border-radius: 15px 15px 0 0; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        .tab-buttons { display: flex; border-bottom: 2px solid #e0e0e0; }
+        .tab-btn { flex: 1; padding: 18px; background: none; border: none; font-size: 1rem; font-weight: 600; color: #555; cursor: pointer; transition: all 0.3s; }
+        .tab-btn.active { color: #667eea; border-bottom: 3px solid #667eea; background: #f5f5ff; }
+        .tab-btn:hover { background: #f0f0f0; color: #1a1a2e; }
+        
+        .tab-content { display: none; padding: 30px; background: #16213e; margin: 0 40px; border-radius: 0 0 15px 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); overflow-y: auto; }
+        .tab-content.active { display: block; }
+        #complaintsTab { min-height: 420px; }
+
+        /* Calendar */
+        .alerts-layout { display: grid; grid-template-columns: 400px 1fr; gap: 24px; align-items: start; }
+        .calendar-box { background: #ffffff; border-radius: 16px; padding: 28px; }
+        .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .cal-header h3 { font-size: 1.15rem; font-weight: 800; color: #1a1a2e; }
+        .cal-nav { background: #f0f0f0; border: none; color: #1a1a2e; font-size: 1.1rem; cursor: pointer; padding: 7px 12px; border-radius: 8px; }
+        .cal-nav:hover { background: #667eea; color: #fff; }
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+        .cal-day-name { text-align: center; font-size: 0.78rem; font-weight: 800; color: #667eea; padding: 6px 0; }
+        .cal-day { text-align: center; padding: 10px 4px; border-radius: 10px; font-size: 0.9rem; cursor: pointer; color: #333; position: relative; transition: all 0.2s; font-weight: 500; }
+        .cal-day:hover { background: #667eea22; color: #667eea; }
+        .cal-day.has-alert { background: #ff6b6b18; color: #e53e3e; font-weight: 800; }
+        .cal-day.has-alert::after { content: ''; width: 6px; height: 6px; background: #e53e3e; border-radius: 50%; position: absolute; bottom: 3px; left: 50%; transform: translateX(-50%); }
+        .cal-day.selected { background: #667eea; color: #fff !important; font-weight: 800; }
+        .cal-day.selected::after { background: #fff; }
+        .cal-day.today { border: 2px solid #667eea; color: #667eea; font-weight: 800; }
+        .cal-day.empty { cursor: default; }
+        .cal-legend { display: flex; gap: 16px; margin-top: 18px; font-size: 0.78rem; color: #555; flex-wrap: wrap; }
+        .cal-legend span { display: flex; align-items: center; gap: 6px; }
+        .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+        .alerts-panel h3 { font-size: 1rem; font-weight: 700; color: #fff; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+        @media (max-width: 900px) { .alerts-layout { grid-template-columns: 1fr; } }
+        
+        .table { width: 100%; border-collapse: collapse; }
+        .table th { background: #0f3460; padding: 15px; text-align: left; font-weight: 600; color: #fff; border-bottom: 2px solid #0f3460; }
+        .table td { padding: 15px; border-bottom: 1px solid #0f3460; color: #eee; }
+        .table tr:hover { background: #0f3460; }
+        
+        .badge { padding: 5px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; }
+        .badge.critical { background: #ff6b6b; color: white; }
+        .badge.high { background: #ffa502; color: white; }
+        .badge.medium { background: #ffd93d; color: #333; }
+        .badge.pending { background: #ffc107; color: #333; }
+        .badge.resolved { background: #28a745; color: white; }
+        
+        .action-btn { padding: 8px 15px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; margin-right: 5px; }
+        .action-btn.view { background: #667eea; color: white; }
+        .action-btn.resolve { background: #28a745; color: white; }
+        .action-btn.delete { background: #dc3545; color: white; }
+        .action-btn:hover { opacity: 0.8; }
+        
+        .clear-btn { background: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; margin-bottom: 15px; }
+        .clear-btn:hover { opacity: 0.8; }
+        
+        .empty-state { text-align: center; padding: 60px 20px; color: #aaa; }
+        .empty-state i { font-size: 4rem; margin-bottom: 20px; opacity: 0.3; }
+        
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center; }
+        .modal.active { display: flex; }
+        .modal-content { background: #16213e; padding: 30px; border-radius: 15px; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto; }
+        .modal-content h2 { color: #667eea; margin-bottom: 20px; }
+        .modal-detail { margin: 15px 0; padding: 15px; background: #0f3460; border-radius: 8px; }
+        .modal-detail strong { color: #aaa; display: block; margin-bottom: 5px; }
+        .modal-detail span { color: #fff; }
+        .close-modal-btn { width: 100%; padding: 12px; background: #dc3545; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; margin-top: 20px; }
+        .close-modal-btn:hover { opacity: 0.8; }
+        
+        @media (max-width: 1200px) {
+            .stats-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+        @media (max-width: 768px) {
+            .stats-grid { grid-template-columns: 1fr; padding: 20px; }
+            .tabs, .tab-content { margin: 0 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1><i class="fas fa-shield-alt"></i> RAKSH-AID Admin Dashboard</h1>
+        <button class="logout-btn" onclick="adminLogout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon red"><i class="fas fa-exclamation-triangle"></i></div>
+            <div class="stat-info">
+                <h3 id="totalAlerts">0</h3>
+                <p>Total SOS Alerts</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon blue"><i class="fas fa-users"></i></div>
+            <div class="stat-info">
+                <h3 id="totalUsers">0</h3>
+                <p>Registered Users</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon purple"><i class="fas fa-laptop-code"></i></div>
+            <div class="stat-info">
+                <h3 id="totalComplaints">0</h3>
+                <p>Cyber Complaints</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon green"><i class="fas fa-check-circle"></i></div>
+            <div class="stat-info">
+                <h3 id="activeAlerts">0</h3>
+                <p>Active Alerts</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon orange"><i class="fas fa-hands-helping"></i></div>
+            <div class="stat-info">
+                <h3 id="totalVolunteers">0</h3>
+                <p>Volunteer Drivers</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <div class="tab-buttons">
+            <button class="tab-btn active" onclick="switchTab('alerts')"><i class="fas fa-bell"></i> SOS Alerts</button>
+            <button class="tab-btn" onclick="switchTab('users')"><i class="fas fa-users"></i> Users Database</button>
+            <button class="tab-btn" onclick="switchTab('complaints')"><i class="fas fa-file-alt"></i> Cyber Complaints</button>
+            <button class="tab-btn" onclick="switchTab('volunteers')"><i class="fas fa-hands-helping"></i> Volunteers</button>
+        </div>
+    </div>
+
+    <div id="alertsTab" class="tab-content active">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+            <button class="clear-btn" style="margin-bottom:0;" onclick="clearAllAlerts()"><i class="fas fa-trash-alt"></i> Clear All Alerts</button>
+            <button onclick="showAllAlerts()" id="showAllBtn" style="background:#667eea;color:white;border:none;padding:9px 18px;border-radius:8px;cursor:pointer;font-weight:600;display:none;"><i class="fas fa-list"></i> Show All</button>
+        </div>
+        <div class="alerts-layout">
+            <div class="calendar-box">
+                <div class="cal-header">
+                    <button class="cal-nav" onclick="changeMonth(-1)"><i class="fas fa-chevron-left"></i></button>
+                    <h3 id="calMonthLabel"></h3>
+                    <button class="cal-nav" onclick="changeMonth(1)"><i class="fas fa-chevron-right"></i></button>
+                </div>
+                <div class="cal-grid">
+                    <div class="cal-day-name">Sun</div><div class="cal-day-name">Mon</div><div class="cal-day-name">Tue</div>
+                    <div class="cal-day-name">Wed</div><div class="cal-day-name">Thu</div><div class="cal-day-name">Fri</div><div class="cal-day-name">Sat</div>
+                </div>
+                <div class="cal-grid" id="calDays"></div>
+                <div class="cal-legend">
+                    <span><span class="dot" style="background:#ff6b6b;"></span> Has Alerts</span>
+                    <span><span class="dot" style="background:#667eea;"></span> Selected</span>
+                    <span><span class="dot" style="background:transparent;border:2px solid #667eea;"></span> Today</span>
+                </div>
+            </div>
+            <div class="alerts-panel">
+                <h3 id="alertsPanelTitle"><i class="fas fa-bell" style="color:#ff6b6b;"></i> All SOS Alerts</h3>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Risk Level</th>
+                            <th>Location</th>
+                            <th>Time</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="alertsTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="usersTab" class="tab-content">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Blood Group</th>
+                    <th>Total Alerts</th>
+                    <th>Active Alerts</th>
+                    <th>Joined On</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="usersTableBody"></tbody>
+        </table>
+    </div>
+
+    <div id="complaintsTab" class="tab-content">
+        <div id="complaintCategories" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:18px;margin-bottom:24px;"></div>
+        <div id="complaintTableWrap" style="display:none;">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+                <button onclick="showAllCategories()" style="background:#667eea;color:white;border:none;padding:8px 16px;border-radius:8px;cursor:pointer;font-weight:600;"><i class="fas fa-arrow-left"></i> All Categories</button>
+                <span id="activeCategoryLabel" style="font-size:1rem;font-weight:700;color:#fff;"></span>
+            </div>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Description</th>
+                        <th>Evidence Link</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="complaintsTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="volunteersTab" class="tab-content">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">
+            <span style="font-weight:700;color:#eee;margin-right:6px;"><i class="fas fa-filter"></i> Filter:</span>
+            <button onclick="filterVolunteers('all')" id="vf-all" style="padding:8px 20px;border:2px solid #667eea;background:#667eea;color:white;border-radius:8px;font-weight:700;cursor:pointer;"><i class="fas fa-users"></i> All</button>
+            <button onclick="filterVolunteers('female')" id="vf-female" style="padding:8px 20px;border:2px solid #e0e0e0;background:white;color:#2c3e50;border-radius:8px;font-weight:700;cursor:pointer;"><i class="fas fa-female" style="color:#ec4899;"></i> Female</button>
+            <button onclick="filterVolunteers('male')" id="vf-male" style="padding:8px 20px;border:2px solid #e0e0e0;background:white;color:#2c3e50;border-radius:8px;font-weight:700;cursor:pointer;"><i class="fas fa-male" style="color:#3b82f6;"></i> Male</button>
+            <span id="vFilterCount" style="margin-left:auto;font-size:0.85rem;color:#aaa;"></span>
+        </div>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Phone</th>
+                    <th>Gender</th>
+                    <th>Vehicle</th>
+                    <th>City / Area</th>
+                    <th>Availability</th>
+                    <th>License No.</th>
+                    <th>Status</th>
+                    <th>Registered On</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="volunteersTableBody"></tbody>
+        </table>
+    </div>
+
+    <div id="complaintModal" class="modal">
+        <div class="modal-content">
+            <h2><i class="fas fa-file-alt"></i> Complaint Details</h2>
+            <div class="modal-detail">
+                <strong>Complaint ID:</strong>
+                <span id="modalComplaintId"></span>
+            </div>
+            <div class="modal-detail">
+                <strong>User Email:</strong>
+                <span id="modalUserEmail"></span>
+            </div>
+            <div class="modal-detail">
+                <strong>Complaint Type:</strong>
+                <span id="modalType"></span>
+            </div>
+            <div class="modal-detail">
+                <strong>Description:</strong>
+                <span id="modalDescription"></span>
+            </div>
+            <div class="modal-detail">
+                <strong>Date & Time:</strong>
+                <span id="modalDate"></span>
+            </div>
+            <div class="modal-detail">
+                <strong>Status:</strong>
+                <span id="modalStatus"></span>
+            </div>
+            <div class="modal-detail" id="modalLinkSection" style="display: none;">
+                <strong>Evidence Link:</strong>
+                <span id="modalLink"></span>
+            </div>
+            <button class="close-modal-btn" onclick="closeComplaintModal()"><i class="fas fa-times"></i> Close</button>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById(tab + 'Tab').classList.add('active');
+        }
+
+        function loadDashboardData() {
+            loadAlerts();
+            loadUsers();
+            loadComplaints();
+            loadVolunteers();
+            updateStats();
+        }
+
+        let allVolunteersData = [];
+
+        async function loadVolunteers() {
+            const tbody = document.getElementById('volunteersTableBody');
+            try {
+                const res = await fetch('http://localhost:3000/api/volunteers');
+                const data = await res.json();
+                allVolunteersData = data.volunteers || [];
+                document.getElementById('totalVolunteers').textContent = allVolunteersData.length;
+                renderVolunteersTable(allVolunteersData);
+            } catch (e) {
+                tbody.innerHTML = '<tr><td colspan="10"><div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Could not load volunteers. Is the backend running?</p></div></td></tr>';
+            }
+        }
+
+        function filterVolunteers(gender) {
+            ['all','female','male'].forEach(g => {
+                const btn = document.getElementById(`vf-${g}`);
+                const isActive = g === gender;
+                btn.style.background = isActive ? (g === 'female' ? '#ec4899' : g === 'male' ? '#3b82f6' : '#667eea') : 'white';
+                btn.style.borderColor = isActive ? (g === 'female' ? '#ec4899' : g === 'male' ? '#3b82f6' : '#667eea') : '#e0e0e0';
+                btn.style.color = isActive ? 'white' : '#2c3e50';
+            });
+            const filtered = gender === 'all' ? allVolunteersData : allVolunteersData.filter(v => v.gender === gender);
+            document.getElementById('vFilterCount').textContent = `Showing ${filtered.length} of ${allVolunteersData.length} drivers`;
+            renderVolunteersTable(filtered);
+        }
+
+        function renderVolunteersTable(volunteers) {
+            const tbody = document.getElementById('volunteersTableBody');
+            if (!volunteers.length) {
+                tbody.innerHTML = '<tr><td colspan="10"><div class="empty-state"><i class="fas fa-hands-helping"></i><p>No volunteers found</p></div></td></tr>';
+                return;
+            }
+            tbody.innerHTML = volunteers.map(v => {
+                const isVerified = v.status === 'Verified';
+                const genderColor = v.gender === 'female' ? '#ec4899' : '#3b82f6';
+                const registeredOn = v.registered_on ? new Date(v.registered_on).toLocaleDateString('en-IN') : 'N/A';
+                return `
+                <tr>
+                    <td><strong>${v.name}</strong></td>
+                    <td><a href="tel:${v.phone}" style="color:#4facfe;">${v.phone}</a></td>
+                    <td><span style="color:${genderColor};font-weight:700;">${v.gender === 'female' ? '&#9792; Female' : '&#9794; Male'}</span></td>
+                    <td><i class="fas fa-car" style="margin-right:5px;color:#aaa;"></i>${v.vehicle_type}</td>
+                    <td><i class="fas fa-map-marker-alt" style="margin-right:5px;color:#dc3545;"></i>${v.city}</td>
+                    <td><i class="fas fa-clock" style="margin-right:5px;color:#ffd93d;"></i>${v.availability}</td>
+                    <td style="font-size:0.85rem;color:#aaa;">${v.license_no}</td>
+                    <td><span class="badge ${isVerified ? 'resolved' : 'pending'}">${isVerified ? '&#10003; Verified' : '&#9203; Pending'}</span></td>
+                    <td style="font-size:0.85rem;color:#aaa;">${registeredOn}</td>
+                    <td>
+                        ${!isVerified
+                            ? `<button class="action-btn resolve" onclick="verifyVolunteer(${v.id})"><i class="fas fa-check"></i> Verify</button>`
+                            : `<button class="action-btn" style="background:#555;cursor:default;"><i class="fas fa-check-double"></i> Verified</button>`
+                        }
+                        <button class="action-btn delete" onclick="deleteVolunteer(${v.id})"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+
+        async function verifyVolunteer(id) {
+            if (!confirm('Mark this volunteer as Police Verified?')) return;
+            try {
+                await fetch(`http://localhost:3000/api/volunteers/${id}/status`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: 'Verified' })
+                });
+                loadVolunteers();
+            } catch (e) { alert('Failed to update status.'); }
+        }
+
+        async function deleteVolunteer(id) {
+            if (!confirm('Delete this volunteer permanently?')) return;
+            try {
+                await fetch(`http://localhost:3000/api/volunteers/${id}`, { method: 'DELETE' });
+                loadVolunteers();
+            } catch (e) { alert('Failed to delete volunteer.'); }
+        }
+
+        let allAlerts = [];
+        let calYear = new Date().getFullYear();
+        let calMonth = new Date().getMonth();
+        let selectedDate = null;
+
+        function toDateKey(dateStr) {
+            const d = new Date(dateStr);
+            return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+        }
+
+        function loadAlerts() {
+            allAlerts = JSON.parse(localStorage.getItem('sosAlerts')) || [];
+            renderCalendar();
+            if (selectedDate) {
+                showAlertsForDate(selectedDate);
+            } else {
+                showAllAlerts();
+            }
+        }
+
+        function renderCalendar() {
+            const alertDates = new Set(allAlerts.map(a => toDateKey(a.time)));
+            const today = toDateKey(new Date().toISOString());
+            const firstDay = new Date(calYear, calMonth, 1).getDay();
+            const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+            const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+            document.getElementById('calMonthLabel').textContent = `${monthNames[calMonth]} ${calYear}`;
+
+            let html = '';
+            for (let i = 0; i < firstDay; i++) html += '<div class="cal-day empty"></div>';
+            for (let d = 1; d <= daysInMonth; d++) {
+                const key = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                const hasAlert = alertDates.has(key);
+                const isToday = key === today;
+                const isSelected = key === selectedDate;
+                const cls = ['cal-day', hasAlert ? 'has-alert' : '', isToday ? 'today' : '', isSelected ? 'selected' : ''].filter(Boolean).join(' ');
+                html += `<div class="${cls}" onclick="selectCalDate('${key}')">${d}</div>`;
+            }
+            document.getElementById('calDays').innerHTML = html;
+        }
+
+        function selectCalDate(dateKey) {
+            selectedDate = dateKey;
+            document.getElementById('showAllBtn').style.display = 'inline-flex';
+            renderCalendar();
+            showAlertsForDate(dateKey);
+        }
+
+        function showAlertsForDate(dateKey) {
+            const [y, m, d] = dateKey.split('-');
+            const label = `${parseInt(d)} ${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][parseInt(m)-1]} ${y}`;
+            document.getElementById('alertsPanelTitle').innerHTML = `<i class="fas fa-calendar-day" style="color:#ff6b6b;"></i> Alerts on ${label}`;
+            const filtered = allAlerts.filter(a => toDateKey(a.time) === dateKey);
+            renderAlertsTable(filtered, `No SOS alerts on ${label}`);
+        }
+
+        function showAllAlerts() {
+            selectedDate = null;
+            document.getElementById('showAllBtn').style.display = 'none';
+            document.getElementById('alertsPanelTitle').innerHTML = '<i class="fas fa-bell" style="color:#ff6b6b;"></i> All SOS Alerts';
+            renderCalendar();
+            renderAlertsTable(allAlerts, 'No SOS alerts found');
+        }
+
+        function renderAlertsTable(alerts, emptyMsg) {
+            const tbody = document.getElementById('alertsTableBody');
+            if (!alerts.length) {
+                tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><i class="fas fa-bell-slash"></i><p>${emptyMsg}</p></div></td></tr>`;
+                return;
+            }
+            tbody.innerHTML = alerts.map(alert => `
+                <tr>
+                    <td><strong>${alert.userName || 'Unknown'}</strong><br><small style="color:#aaa;">${alert.userId}</small></td>
+                    <td><span class="badge ${(alert.riskLevel||'medium').toLowerCase()}">${alert.riskLevel}</span></td>
+                    <td><a href="https://www.openstreetmap.org/?mlat=${alert.location.lat}&mlon=${alert.location.lng}#map=15/${alert.location.lat}/${alert.location.lng}" target="_blank" style="color:#4facfe;"><i class="fas fa-map-marker-alt"></i> View Map</a></td>
+                    <td style="font-size:0.85rem;">${new Date(alert.time).toLocaleString('en-IN')}</td>
+                    <td><span class="badge ${alert.active ? 'pending' : 'resolved'}">${alert.active ? 'Active' : 'Resolved'}</span></td>
+                    <td>
+                        <button class="action-btn view" onclick="viewAlert(${alert.id})"><i class="fas fa-eye"></i></button>
+                        <button class="action-btn resolve" onclick="resolveAlert(${alert.id})"><i class="fas fa-check"></i></button>
+                    </td>
+                </tr>`).join('');
+        }
+
+        function changeMonth(dir) {
+            calMonth += dir;
+            if (calMonth > 11) { calMonth = 0; calYear++; }
+            if (calMonth < 0)  { calMonth = 11; calYear--; }
+            renderCalendar();
+        }
+
+        async function loadUsers() {
+            const tbody = document.getElementById('usersTableBody');
+            try {
+                const [usersRes, statsRes] = await Promise.all([
+                    fetch('http://localhost:3000/api/admin/users'),
+                    fetch('http://localhost:3000/api/admin/alert-stats')
+                ]);
+                const usersData = await usersRes.json();
+                const statsData = await statsRes.json();
+                const users = usersData.users || [];
+                const statsMap = {};
+                (statsData.stats || []).forEach(s => { statsMap[s.user_email] = s; });
+
+                document.getElementById('totalUsers').textContent = users.length;
+
+                if (!users.length) {
+                    tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state"><i class="fas fa-users-slash"></i><p>No users found</p></div></td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = users.map(user => {
+                    const stat = statsMap[user.email] || {};
+                    const joinedDate = user.created_at ? new Date(user.created_at).toLocaleDateString('en-IN') : 'N/A';
+                    return `
+                    <tr>
+                        <td><strong>${user.name || '—'}</strong></td>
+                        <td>${user.email}</td>
+                        <td><span style="background:#0f3460;padding:3px 10px;border-radius:12px;font-size:0.85rem;">${user.blood_group || '—'}</span></td>
+                        <td>${stat.total_alerts || 0}</td>
+                        <td>${stat.active_alerts || 0}</td>
+                        <td style="font-size:0.85rem;color:#aaa;">${joinedDate}</td>
+                        <td>
+                            <button class="action-btn view" onclick="viewUser('${user.name}','${user.email}','${user.blood_group || ''}','${joinedDate}','${stat.total_alerts || 0}')"><i class="fas fa-eye"></i> View</button>
+                        </td>
+                    </tr>`;
+                }).join('');
+            } catch (e) {
+                tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Could not load users. Is the backend running?</p></div></td></tr>';
+            }
+        }
+
+        const COMPLAINT_META = {
+            'Online Harassment':  { icon: 'fa-user-slash',      color: '#e74c3c' },
+            'Cyberbullying':      { icon: 'fa-fist-raised',     color: '#e67e22' },
+            'Financial Fraud':    { icon: 'fa-money-bill-wave', color: '#f39c12' },
+            'Identity Theft':     { icon: 'fa-id-card',         color: '#9b59b6' },
+            'Hacking':            { icon: 'fa-terminal',        color: '#2980b9' },
+            'Phishing':           { icon: 'fa-fish',            color: '#16a085' },
+            'Fake Profile':       { icon: 'fa-user-secret',     color: '#8e44ad' },
+            'Blackmail':          { icon: 'fa-lock',            color: '#c0392b' },
+            'Other':              { icon: 'fa-exclamation-circle', color: '#7f8c8d' }
+        };
+
+        let allComplaints = [];
+
+        async function loadComplaints() {
+            try {
+                const res = await fetch('http://localhost:3000/api/admin/cyber-complaints');
+                const data = await res.json();
+                allComplaints = data.complaints || [];
+            } catch (e) {
+                // fallback to localStorage
+                allComplaints = [];
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key.startsWith('cyberComplaints_')) {
+                        const email = key.replace('cyberComplaints_', '');
+                        (JSON.parse(localStorage.getItem(key)) || []).forEach(c =>
+                            allComplaints.push({ ...c, user_email: email, complaint_type: c.type, created_at: c.date })
+                        );
+                    }
+                }
+            }
+            document.getElementById('totalComplaints').textContent = allComplaints.length;
+            showAllCategories();
+        }
+
+        function showAllCategories() {
+            document.getElementById('complaintTableWrap').style.display = 'none';
+            document.getElementById('complaintCategories').style.display = 'grid';
+
+            // Group by type
+            const grouped = {};
+            allComplaints.forEach(c => {
+                const type = c.complaint_type || c.type || 'Other';
+                if (!grouped[type]) grouped[type] = [];
+                grouped[type].push(c);
+            });
+
+            const container = document.getElementById('complaintCategories');
+            if (!Object.keys(grouped).length) {
+                container.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><i class="fas fa-file-excel"></i><p>No cyber complaints found</p></div>';
+                return;
+            }
+
+            container.innerHTML = Object.entries(grouped).map(([type, items]) => {
+                const meta = COMPLAINT_META[type] || COMPLAINT_META['Other'];
+                const pending = items.filter(c => (c.status || 'Pending') === 'Pending').length;
+                return `
+                <div onclick="showCategoryComplaints('${type}')" style="background:#ffffff;border-radius:14px;padding:20px 16px;cursor:pointer;border:2px solid #e0e0e0;transition:all 0.25s;text-align:center;"
+                    onmouseover="this.style.borderColor='${meta.color}';this.style.transform='translateY(-3px)';this.style.boxShadow='0 6px 20px rgba(0,0,0,0.12)';"
+                    onmouseout="this.style.borderColor='#e0e0e0';this.style.transform='translateY(0)';this.style.boxShadow='none';">
+                    <div style="width:52px;height:52px;border-radius:50%;background:${meta.color}22;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;">
+                        <i class="fas ${meta.icon}" style="font-size:1.4rem;color:${meta.color};"></i>
+                    </div>
+                    <div style="font-size:1.6rem;font-weight:800;color:#1a1a2e;">${items.length}</div>
+                    <div style="font-size:0.8rem;font-weight:700;color:#444;margin-top:4px;">${type}</div>
+                    ${pending > 0 ? `<div style="margin-top:8px;"><span class="badge pending">${pending} Pending</span></div>` : '<div style="margin-top:8px;"><span class="badge resolved">All Resolved</span></div>'}
+                </div>`;
+            }).join('');
+        }
+
+        function showCategoryComplaints(type) {
+            document.getElementById('complaintCategories').style.display = 'none';
+            document.getElementById('complaintTableWrap').style.display = 'block';
+            const meta = COMPLAINT_META[type] || COMPLAINT_META['Other'];
+            document.getElementById('activeCategoryLabel').innerHTML =
+                `<i class="fas ${meta.icon}" style="color:${meta.color};margin-right:8px;"></i>${type}`;
+
+            const filtered = allComplaints.filter(c => (c.complaint_type || c.type || 'Other') === type);
+            const tbody = document.getElementById('complaintsTableBody');
+
+            tbody.innerHTML = filtered.map(c => {
+                const email = c.user_email || c.userEmail || 'Unknown';
+                const desc = (c.description || '').substring(0, 80) + ((c.description || '').length > 80 ? '...' : '');
+                const date = c.created_at ? new Date(c.created_at).toLocaleString('en-IN') : (c.date || 'N/A');
+                const status = c.status || 'Pending';
+                const link = c.evidence_url || c.link || '';
+                return `
+                <tr>
+                    <td><strong>${email.split('@')[0]}</strong><br><small style="color:#aaa;">${email}</small></td>
+                    <td style="max-width:220px;">${desc}</td>
+                    <td>${link ? `<a href="${link}" target="_blank" style="color:#4facfe;"><i class="fas fa-external-link-alt"></i> View</a>` : '<span style="color:#555;">—</span>'}</td>
+                    <td style="font-size:0.85rem;color:#aaa;">${date}</td>
+                    <td><span class="badge ${status === 'Pending' ? 'pending' : 'resolved'}">${status}</span></td>
+                    <td>
+                        <button class="action-btn view" onclick="viewComplaint(${c.id})"><i class="fas fa-eye"></i></button>
+                        <button class="action-btn delete" onclick="deleteComplaint(${c.id}, '${email}')"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+
+        async function updateStats() {
+            const alerts = JSON.parse(localStorage.getItem('sosAlerts')) || [];
+            const activeAlerts = alerts.filter(a => a.active).length;
+            let complaintCount = 0;
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key.startsWith('cyberComplaints_')) complaintCount += (JSON.parse(localStorage.getItem(key)) || []).length;
+            }
+            document.getElementById('totalAlerts').textContent = alerts.length;
+            document.getElementById('totalComplaints').textContent = complaintCount;
+            document.getElementById('activeAlerts').textContent = activeAlerts;
+            // Get real user count from API
+            try {
+                const res = await fetch('http://localhost:3000/api/admin/users');
+                const data = await res.json();
+                document.getElementById('totalUsers').textContent = (data.users || []).length;
+            } catch (e) {}
+        }
+
+        function resolveAlert(id) {
+            const alerts = JSON.parse(localStorage.getItem('sosAlerts')) || [];
+            const alert = alerts.find(a => a.id === id);
+            if (alert) {
+                alert.active = false;
+                localStorage.setItem('sosAlerts', JSON.stringify(alerts));
+                loadDashboardData();
+            }
+        }
+
+        function viewAlert(id) {
+            const alerts = JSON.parse(localStorage.getItem('sosAlerts')) || [];
+            const alert = alerts.find(a => a.id === id);
+            if (alert) {
+                alert(`Alert Details:\n\nUser: ${alert.userName}\nRisk: ${alert.riskLevel}\nTime: ${new Date(alert.time).toLocaleString()}\nLocation: ${alert.location.lat}, ${alert.location.lng}`);
+            }
+        }
+
+        function viewUser(name, email, bloodGroup, joinedDate, totalAlerts) {
+            alert(`User Details:\n\nName: ${name}\nEmail: ${email}\nBlood Group: ${bloodGroup || 'N/A'}\nJoined: ${joinedDate}\nTotal SOS Alerts: ${totalAlerts}`);
+        }
+
+        function viewComplaint(id) {
+            const c = allComplaints.find(x => x.id == id);
+            if (!c) return;
+            const email = c.user_email || c.userEmail || 'Unknown';
+            const type = c.complaint_type || c.type || 'Other';
+            const date = c.created_at ? new Date(c.created_at).toLocaleString('en-IN') : (c.date || 'N/A');
+            const link = c.evidence_url || c.link || '';
+            document.getElementById('modalComplaintId').textContent = c.id;
+            document.getElementById('modalUserEmail').textContent = email;
+            document.getElementById('modalType').textContent = type;
+            document.getElementById('modalDescription').textContent = c.description || '';
+            document.getElementById('modalDate').textContent = date;
+            document.getElementById('modalStatus').textContent = c.status || 'Pending';
+            if (link) {
+                document.getElementById('modalLinkSection').style.display = 'block';
+                document.getElementById('modalLink').innerHTML = `<a href="${link}" target="_blank" style="color:#667eea;">${link}</a>`;
+            } else {
+                document.getElementById('modalLinkSection').style.display = 'none';
+            }
+            document.getElementById('complaintModal').classList.add('active');
+        }
+        
+        function closeComplaintModal() {
+            document.getElementById('complaintModal').classList.remove('active');
+        }
+
+        function deleteComplaint(id, email) {
+            if (!confirm('Delete this complaint?')) return;
+            // Remove from localStorage if present
+            const key = `cyberComplaints_${email}`;
+            let local = JSON.parse(localStorage.getItem(key)) || [];
+            local = local.filter(c => c.id != id);
+            localStorage.setItem(key, JSON.stringify(local));
+            // Remove from allComplaints and re-render current category
+            const type = (allComplaints.find(c => c.id == id) || {}).complaint_type || (allComplaints.find(c => c.id == id) || {}).type;
+            allComplaints = allComplaints.filter(c => c.id != id);
+            document.getElementById('totalComplaints').textContent = allComplaints.length;
+            if (type) showCategoryComplaints(type);
+        }
+
+        function clearAllAlerts() {
+            if (confirm('Are you sure you want to delete all SOS alerts? This cannot be undone.')) {
+                localStorage.removeItem('sosAlerts');
+                loadDashboardData();
+                alert('All SOS alerts have been cleared.');
+            }
+        }
+
+        function adminLogout() {
+            localStorage.removeItem('adminAuth');
+            window.location.href = 'admin-login.html';
+        }
+
+        if (localStorage.getItem('adminAuth') !== 'true') {
+            window.location.href = 'admin-login.html';
+        }
+
+        loadDashboardData();
+        setInterval(loadDashboardData, 5000);
+    </script>
+</body>
+</html>

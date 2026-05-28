@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blood Bank - RAKSH-AID</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            min-height: 100vh;
+        }
+
+        .header {
+            background: rgba(0, 0, 0, 0.4);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px;
+        }
+
+        .page-title {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .page-title h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .page-title p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .blood-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .blood-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .blood-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, #dc3545 0%, #c82333 100%);
+        }
+
+        .blood-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .blood-type {
+            font-size: 3.5rem;
+            font-weight: bold;
+            color: #dc3545;
+            margin-bottom: 15px;
+        }
+
+        .availability {
+            font-size: 1.1rem;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .units {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .units-label {
+            font-size: 0.9rem;
+            color: #999;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .status-badge.available {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-badge.low {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-badge.critical {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .request-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: all 0.3s;
+        }
+
+        .request-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(220, 53, 69, 0.4);
+        }
+
+        .info-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .info-section h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .info-card {
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #dc3545;
+        }
+
+        .info-card h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .info-card p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 1024px) {
+            .blood-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .blood-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .blood-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <button class="back-btn" onclick="window.location.href='index.html'">
+                <i class="fas fa-arrow-left"></i> Back
+            </button>
+            <h1><i class="fas fa-tint"></i> Blood Bank</h1>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="page-title">
+            <h1>Emergency Blood Bank</h1>
+            <p>Available blood groups for immediate emergency needs</p>
+        </div>
+
+        <div class="blood-grid" id="bloodGrid"></div>
+
+        <div class="info-section">
+            <h2><i class="fas fa-info-circle"></i> Important Information</h2>
+            <div class="info-grid">
+                <div class="info-card">
+                    <h3><i class="fas fa-clock"></i> 24/7 Availability</h3>
+                    <p>Blood bank services are available round the clock for emergency situations.</p>
+                </div>
+                <div class="info-card">
+                    <h3><i class="fas fa-phone-alt"></i> Emergency Contact</h3>
+                    <p>Call 102 for ambulance or contact nearest hospital blood bank immediately.</p>
+                </div>
+                <div class="info-card">
+                    <h3><i class="fas fa-heartbeat"></i> Donation</h3>
+                    <p>Donate blood regularly to help save lives. One donation can save up to 3 lives.</p>
+                </div>
+                <div class="info-card">
+                    <h3><i class="fas fa-shield-alt"></i> Safety</h3>
+                    <p>All blood is screened for infections and stored under strict safety protocols.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const bloodGroups = [
+            { type: 'A+', units: 45, status: 'available' },
+            { type: 'A-', units: 12, status: 'low' },
+            { type: 'B+', units: 38, status: 'available' },
+            { type: 'B-', units: 8, status: 'critical' },
+            { type: 'AB+', units: 22, status: 'available' },
+            { type: 'AB-', units: 5, status: 'critical' },
+            { type: 'O+', units: 52, status: 'available' },
+            { type: 'O-', units: 15, status: 'low' }
+        ];
+
+        function getStatusText(status) {
+            const statusMap = {
+                'available': 'Available',
+                'low': 'Low Stock',
+                'critical': 'Critical'
+            };
+            return statusMap[status];
+        }
+
+        function loadBloodBank() {
+            const bloodGrid = document.getElementById('bloodGrid');
+            
+            bloodGrid.innerHTML = bloodGroups.map(blood => `
+                <div class="blood-card">
+                    <div class="blood-type">${blood.type}</div>
+                    <div class="availability">Blood Group</div>
+                    <div class="units">${blood.units}</div>
+                    <div class="units-label">Units Available</div>
+                    <span class="status-badge ${blood.status}">${getStatusText(blood.status)}</span>
+                    <button class="request-btn" onclick="requestBlood('${blood.type}')">
+                        <i class="fas fa-hand-holding-medical"></i> Request Blood
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function requestBlood(bloodType) {
+            if (confirm(`Request ${bloodType} blood?\n\nThis will notify the blood bank and emergency services.`)) {
+                alert(`Blood request for ${bloodType} has been sent!\n\nEmergency services will contact you shortly.\n\nFor immediate assistance, call 102.`);
+                
+                // Log request
+                console.log(`Blood request: ${bloodType} at ${new Date().toLocaleString()}`);
+            }
+        }
+
+        loadBloodBank();
+    </script>
+</body>
+</html>

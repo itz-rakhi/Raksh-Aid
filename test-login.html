@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Login/Register</title>
+    <style>
+        body { font-family: Arial; padding: 20px; background: #f5f5f5; }
+        .test { background: white; padding: 20px; margin: 10px 0; border-radius: 8px; }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; margin: 5px; }
+        input { padding: 8px; margin: 5px; border: 1px solid #ddd; border-radius: 4px; width: 200px; }
+        .result { margin-top: 10px; padding: 10px; background: #f8f9fa; border-left: 4px solid #28a745; }
+        .error { border-left-color: #dc3545; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test Login/Register System</h1>
+    
+    <div class="test">
+        <h3>1. Test Backend Connection</h3>
+        <button onclick="testBackend()">Test Backend</button>
+        <div id="backendResult"></div>
+    </div>
+
+    <div class="test">
+        <h3>2. Test Register</h3>
+        <input type="text" id="regName" placeholder="Name" value="Test User"><br>
+        <input type="email" id="regEmail" placeholder="Email" value="test@test.com"><br>
+        <input type="text" id="regBlood" placeholder="Blood Group" value="O+"><br>
+        <input type="password" id="regPass" placeholder="Password" value="test123"><br>
+        <button onclick="testRegister()">Register</button>
+        <div id="registerResult"></div>
+    </div>
+
+    <div class="test">
+        <h3>3. Test Login</h3>
+        <input type="email" id="loginEmail" placeholder="Email" value="test@test.com"><br>
+        <input type="password" id="loginPass" placeholder="Password" value="test123"><br>
+        <button onclick="testLogin()">Login</button>
+        <div id="loginResult"></div>
+    </div>
+
+    <div class="test">
+        <h3>4. Check Database</h3>
+        <button onclick="checkDB()">Check Users in DB</button>
+        <div id="dbResult"></div>
+    </div>
+
+    <script src="api-service.js"></script>
+    <script>
+        async function testBackend() {
+            const result = document.getElementById('backendResult');
+            result.innerHTML = 'Testing...';
+            
+            try {
+                const res = await fetch('http://localhost:3000/api/contacts/test@test.com');
+                if (res.ok) {
+                    result.innerHTML = '<div class="result">✅ Backend is running!</div>';
+                } else {
+                    result.innerHTML = '<div class="result error">❌ Backend returned error</div>';
+                }
+            } catch (error) {
+                result.innerHTML = '<div class="result error">❌ Backend not running!<br>Start it with: cd backend && npm start</div>';
+            }
+        }
+
+        async function testRegister() {
+            const result = document.getElementById('registerResult');
+            result.innerHTML = 'Registering...';
+            
+            const name = document.getElementById('regName').value;
+            const email = document.getElementById('regEmail').value;
+            const blood = document.getElementById('regBlood').value;
+            const pass = document.getElementById('regPass').value;
+            
+            try {
+                const res = await apiService.register(name, email, pass, blood);
+                console.log('Register response:', res);
+                
+                if (res.success) {
+                    result.innerHTML = '<div class="result">✅ Registration successful!<br>User: ' + name + '<br>Email: ' + email + '</div>';
+                } else {
+                    result.innerHTML = '<div class="result error">❌ ' + res.error + '</div>';
+                }
+            } catch (error) {
+                result.innerHTML = '<div class="result error">❌ Error: ' + error.message + '</div>';
+            }
+        }
+
+        async function testLogin() {
+            const result = document.getElementById('loginResult');
+            result.innerHTML = 'Logging in...';
+            
+            const email = document.getElementById('loginEmail').value;
+            const pass = document.getElementById('loginPass').value;
+            
+            try {
+                const res = await apiService.login(email, pass);
+                console.log('Login response:', res);
+                
+                if (res.success) {
+                    result.innerHTML = '<div class="result">✅ Login successful!<br>' + JSON.stringify(res.user, null, 2) + '</div>';
+                    localStorage.setItem('currentUser', JSON.stringify(res.user));
+                } else {
+                    result.innerHTML = '<div class="result error">❌ ' + res.error + '</div>';
+                }
+            } catch (error) {
+                result.innerHTML = '<div class="result error">❌ Error: ' + error.message + '</div>';
+            }
+        }
+
+        async function checkDB() {
+            const result = document.getElementById('dbResult');
+            result.innerHTML = 'Checking database...';
+            
+            result.innerHTML = '<div class="result">Run this in MySQL:<br><br><code>USE rakshaaid_database;<br>SELECT * FROM users;</code><br><br>Or check backend terminal for connection status.</div>';
+        }
+
+        // Auto test on load
+        window.onload = () => {
+            testBackend();
+        };
+    </script>
+</body>
+</html>

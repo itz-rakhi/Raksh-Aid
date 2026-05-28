@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Backend API Test</title>
+    <style>
+        body { font-family: Arial; padding: 20px; background: #f5f5f5; }
+        .test-box { background: white; padding: 20px; margin: 10px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; margin: 5px; }
+        button:hover { background: #0056b3; }
+        .result { margin-top: 10px; padding: 10px; background: #f8f9fa; border-left: 4px solid #28a745; }
+        .error { border-left-color: #dc3545; }
+        input { padding: 8px; margin: 5px; border: 1px solid #ddd; border-radius: 4px; width: 200px; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Backend API Test</h1>
+    
+    <div class="test-box">
+        <h3>1. Test Server Connection</h3>
+        <button onclick="testConnection()">Test Connection</button>
+        <div id="connectionResult"></div>
+    </div>
+
+    <div class="test-box">
+        <h3>2. Test Alert Stats</h3>
+        <input type="email" id="testEmail" placeholder="Enter email" value="">
+        <button onclick="testAlertStats()">Get Alert Stats</button>
+        <div id="statsResult"></div>
+    </div>
+
+    <div class="test-box">
+        <h3>3. Test Save SOS Alert</h3>
+        <button onclick="testSaveAlert()">Save Test Alert</button>
+        <div id="saveResult"></div>
+    </div>
+
+    <div class="test-box">
+        <h3>4. Test Get Contacts</h3>
+        <button onclick="testGetContacts()">Get Contacts</button>
+        <div id="contactsResult"></div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3000/api';
+
+        async function testConnection() {
+            const result = document.getElementById('connectionResult');
+            result.innerHTML = 'Testing...';
+            
+            try {
+                const res = await fetch(API_URL + '/contacts/test@test.com');
+                const data = await res.json();
+                result.innerHTML = `<div class="result">✅ Server is running!<br>Response: ${JSON.stringify(data)}</div>`;
+            } catch (error) {
+                result.innerHTML = `<div class="result error">❌ Server not running!<br>Error: ${error.message}<br><br>Please start backend: cd backend && npm start</div>`;
+            }
+        }
+
+        async function testAlertStats() {
+            const email = document.getElementById('testEmail').value || 'test@test.com';
+            const result = document.getElementById('statsResult');
+            result.innerHTML = 'Loading...';
+            
+            try {
+                const res = await fetch(`${API_URL}/alert-stats/${encodeURIComponent(email)}`);
+                const data = await res.json();
+                result.innerHTML = `<div class="result">✅ Stats loaded!<br>${JSON.stringify(data, null, 2)}</div>`;
+            } catch (error) {
+                result.innerHTML = `<div class="result error">❌ Error: ${error.message}</div>`;
+            }
+        }
+
+        async function testSaveAlert() {
+            const email = document.getElementById('testEmail').value || 'test@test.com';
+            const result = document.getElementById('saveResult');
+            result.innerHTML = 'Saving...';
+            
+            try {
+                const res = await fetch(`${API_URL}/sos-alert`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        userEmail: email,
+                        location: { lat: 19.0760, lng: 72.8777 },
+                        riskLevel: 'HIGH',
+                        riskFactors: ['Test alert']
+                    })
+                });
+                const data = await res.json();
+                result.innerHTML = `<div class="result">✅ Alert saved!<br>${JSON.stringify(data, null, 2)}</div>`;
+                
+                // Refresh stats
+                setTimeout(testAlertStats, 500);
+            } catch (error) {
+                result.innerHTML = `<div class="result error">❌ Error: ${error.message}</div>`;
+            }
+        }
+
+        async function testGetContacts() {
+            const email = document.getElementById('testEmail').value || 'test@test.com';
+            const result = document.getElementById('contactsResult');
+            result.innerHTML = 'Loading...';
+            
+            try {
+                const res = await fetch(`${API_URL}/contacts/${encodeURIComponent(email)}`);
+                const data = await res.json();
+                result.innerHTML = `<div class="result">✅ Contacts loaded!<br>${JSON.stringify(data, null, 2)}</div>`;
+            } catch (error) {
+                result.innerHTML = `<div class="result error">❌ Error: ${error.message}</div>`;
+            }
+        }
+
+        // Auto test connection on load
+        window.onload = () => {
+            testConnection();
+            
+            // Get email from localStorage if available
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            if (currentUser && currentUser.email) {
+                document.getElementById('testEmail').value = currentUser.email;
+            }
+        };
+    </script>
+</body>
+</html>
